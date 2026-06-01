@@ -51,7 +51,7 @@ class TicketAdmin(admin.ModelAdmin):
         'solicitante_nombre', 'asignado_a', 'creado_en',
     )
     list_filter = ('estado', 'prioridad', 'hotel', 'categoria', 'asignado_a')
-    search_fields = ('titulo', 'descripcion', 'solicitante_nombre', 'solicitante_email', 'ubicacion_especifica')
+    search_fields = ('titulo', 'descripcion', 'solicitante_nombre', 'ubicacion_especifica')
     date_hierarchy = 'creado_en'
     readonly_fields = ('creado_en', 'actualizado_en', 'primera_respuesta_en', 'resuelto_en', 'cerrado_en')
     inlines = [ComentarioInline, AuditoriaInline]
@@ -60,7 +60,7 @@ class TicketAdmin(admin.ModelAdmin):
             'fields': ('titulo', 'descripcion', 'hotel', 'categoria', 'ubicacion_especifica')
         }),
         ('Solicitante', {
-            'fields': ('solicitante_nombre', 'solicitante_email', 'solicitante_usuario')
+            'fields': ('solicitante_nombre', 'solicitante_usuario')
         }),
         ('Gestión', {
             'fields': ('prioridad', 'estado', 'asignado_a')

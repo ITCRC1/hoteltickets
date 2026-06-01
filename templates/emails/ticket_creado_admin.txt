@@ -11,7 +11,7 @@ Prioridad:      {{ ticket.get_prioridad_display }}
 Ubicación:      {{ ticket.ubicacion_especifica|default:"No especificada" }}
 
 Solicitante:    {{ ticket.solicitante_nombre }}
-{% if ticket.solicitante_email %}Correo:         {{ ticket.solicitante_email }}{% endif %}
+
 
 Descripción
 ─────────────

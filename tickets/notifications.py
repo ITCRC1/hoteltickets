@@ -45,7 +45,6 @@ def _enviar(asunto, plantilla, contexto, destinatarios):
 def notificar_ticket_creado(ticket):
     """Cuando se crea un ticket nuevo:
     - Alerta a los emails configurados en NOTIFICATION_EMAILS.
-    - Envía confirmación al solicitante si dejó correo.
     """
     contexto = {'ticket': ticket, 'url': _construir_url(ticket)}
 
@@ -59,40 +58,42 @@ def notificar_ticket_creado(ticket):
             destinatarios=admins,
         )
 
-    # 2) Confirmación al solicitante
-    if ticket.solicitante_email:
-        _enviar(
-            asunto=f'Recibimos tu reporte (#{ticket.id})',
-            plantilla='ticket_recibido_solicitante',
-            contexto=contexto,
-            destinatarios=[ticket.solicitante_email],
-        )
+    # 2) Confirmación al solicitante [COMENTADO - Simplificación de notificaciones]
+    # if ticket.solicitante_email:
+    #     _enviar(
+    #         asunto=f'Recibimos tu reporte (#{ticket.id})',
+    #         plantilla='ticket_recibido_solicitante',
+    #         contexto=contexto,
+    #         destinatarios=[ticket.solicitante_email],
+    #     )
 
 
-def notificar_comentario(comentario):
-    """Cuando se añade un comentario público al ticket."""
-    if comentario.interno:
-        return  # las notas internas no se envían al solicitante
-    ticket = comentario.ticket
-    if ticket.solicitante_email:
-        _enviar(
-            asunto=f'[Ticket #{ticket.id}] Nueva actualización',
-            plantilla='ticket_comentario',
-            contexto={
-                'ticket': ticket,
-                'comentario': comentario,
-                'url': _construir_url(ticket),
-            },
-            destinatarios=[ticket.solicitante_email],
-        )
+# [COMENTADO - Simplificación de notificaciones]
+# def notificar_comentario(comentario):
+#     """Cuando se añade un comentario público al ticket."""
+#     if comentario.interno:
+#         return  # las notas internas no se envían al solicitante
+#     ticket = comentario.ticket
+#     if ticket.solicitante_email:
+#         _enviar(
+#             asunto=f'[Ticket #{ticket.id}] Nueva actualización',
+#             plantilla='ticket_comentario',
+#             contexto={
+#                 'ticket': ticket,
+#                 'comentario': comentario,
+#                 'url': _construir_url(ticket),
+#             },
+#             destinatarios=[ticket.solicitante_email],
+#         )
 
 
-def notificar_resolucion(ticket):
-    """Cuando el ticket se marca como resuelto."""
-    if ticket.solicitante_email:
-        _enviar(
-            asunto=f'[Ticket #{ticket.id}] Resuelto · {ticket.titulo}',
-            plantilla='ticket_resuelto',
-            contexto={'ticket': ticket, 'url': _construir_url(ticket)},
-            destinatarios=[ticket.solicitante_email],
-        )
+# [COMENTADO - Simplificación de notificaciones]
+# def notificar_resolucion(ticket):
+#     """Cuando el ticket se marca como resuelto."""
+#     if ticket.solicitante_email:
+#         _enviar(
+#             asunto=f'[Ticket #{ticket.id}] Resuelto · {ticket.titulo}',
+#             plantilla='ticket_resuelto',
+#             contexto={'ticket': ticket, 'url': _construir_url(ticket)},
+#             destinatarios=[ticket.solicitante_email],
+#         )

@@ -99,7 +99,6 @@ class Ticket(models.Model):
         max_length=100,
         help_text='Nombre de quien reporta (si no tiene cuenta)'
     )
-    solicitante_email = models.EmailField(blank=True)
     solicitante_usuario = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True,
         related_name='tickets_creados',
