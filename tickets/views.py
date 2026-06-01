@@ -229,9 +229,9 @@ def ticket_detalle(request, pk):
                         ticket=t, accion='cambio_estado', usuario=request.user,
                         detalle=f'De "{dict(Ticket.ESTADO_CHOICES)[estado_anterior]}" a "{t.get_estado_display()}"'
                     )
-                    # Notificar al solicitante si pasó a resuelto [COMENTADO - Simplificación de notificaciones]
-                    # if t.estado == 'resuelto' and estado_anterior != 'resuelto':
-                    #     notifications.notificar_resolucion(t)
+                    # Notificar al solicitante si pasó a resuelto
+                    if t.estado == 'resuelto' and estado_anterior != 'resuelto':
+                        notifications.notificar_resolucion(t)
                 if t.prioridad != prioridad_anterior:
                     RegistroAuditoria.registrar(
                         ticket=t, accion='cambio_prioridad', usuario=request.user,
@@ -264,8 +264,8 @@ def ticket_detalle(request, pk):
                     ticket=ticket, accion='comentar', usuario=request.user,
                     detalle=('Nota interna: ' if c.interno else '') + c.contenido[:120]
                 )
-                # Notificar al solicitante si el comentario es público [COMENTADO - Simplificación de notificaciones]
-                # notifications.notificar_comentario(c)
+                # Notificar al solicitante si el comentario es público
+                notifications.notificar_comentario(c)
                 messages.success(request, 'Comentario añadido.')
                 return redirect('ticket_detalle', pk=ticket.pk)
     else:

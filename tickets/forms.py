@@ -26,7 +26,7 @@ class TicketPublicoForm(forms.ModelForm):
             'prioridad',
             'titulo', 'descripcion',
             'ubicacion_especifica',
-            'solicitante_nombre',
+            'solicitante_nombre', 'solicitante_email',
         ]
         widgets = {
             'hotel': forms.Select(attrs={'class': 'form-select form-select-lg'}),
@@ -49,12 +49,17 @@ class TicketPublicoForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Tu nombre completo',
             }),
+            'solicitante_email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'correo@hotel.com',
+            }),
         }
         labels = {
             'titulo': 'Título del reporte',
             'descripcion': 'Descripción detallada',
             'ubicacion_especifica': 'Ubicación específica',
             'solicitante_nombre': 'Tu nombre',
+            'solicitante_email': 'Tu correo electrónico',
             'prioridad': '¿Qué tan urgente es?',
         }
 

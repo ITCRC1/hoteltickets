@@ -36,6 +36,9 @@
                     <div class="col-md-6 mb-2">
                         <strong>Solicitante:</strong> {{ ticket.solicitante_nombre }}
                     </div>
+                    <div class="col-md-6 mb-2">
+                        <strong>Email:</strong> <a href="mailto:{{ ticket.solicitante_email }}">{{ ticket.solicitante_email }}</a>
+                    </div>
                 </div>
             </div>
         </div>

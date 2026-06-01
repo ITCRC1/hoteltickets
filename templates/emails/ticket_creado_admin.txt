@@ -1,20 +1,14 @@
-Se ha creado un nuevo ticket:
+Se ha creado un nuevo ticket de TI.
 
-──────────────────────────────────────────
-  Ticket #{{ ticket.id }}
-  {{ ticket.titulo }}
-──────────────────────────────────────────
-
+Ticket:         #{{ ticket.id }}
+Asunto:         {{ ticket.titulo }}
 Hotel:          {{ ticket.hotel.nombre }}
 Categoría:      {{ ticket.categoria.nombre }}
 Prioridad:      {{ ticket.get_prioridad_display }}
 Ubicación:      {{ ticket.ubicacion_especifica|default:"No especificada" }}
-
 Solicitante:    {{ ticket.solicitante_nombre }}
 
-
-Descripción
-─────────────
+Descripción:
 {{ ticket.descripcion }}
 
 Registrado:     {{ ticket.creado_en|date:"d/m/Y H:i" }}
