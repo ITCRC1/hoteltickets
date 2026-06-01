@@ -68,7 +68,7 @@ def notificar_ticket_creado(ticket):
     # 2) Confirmación al solicitante
     if ticket.solicitante_email:
         _enviar(
-            asunto=f'Recibimos tu reporte (#{ticket.id})',
+            asunto=f'Recibimos tu reporte · {ticket.hotel.nombre}',
             plantilla='ticket_recibido_solicitante',
             contexto=contexto,
             destinatarios=[ticket.solicitante_email],
