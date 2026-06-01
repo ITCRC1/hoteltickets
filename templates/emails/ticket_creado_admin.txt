@@ -1,0 +1,25 @@
+Se ha creado un nuevo ticket:
+
+──────────────────────────────────────────
+  Ticket #{{ ticket.id }}
+  {{ ticket.titulo }}
+──────────────────────────────────────────
+
+Hotel:          {{ ticket.hotel.nombre }}
+Categoría:      {{ ticket.categoria.nombre }}
+Prioridad:      {{ ticket.get_prioridad_display }}
+Ubicación:      {{ ticket.ubicacion_especifica|default:"No especificada" }}
+
+Solicitante:    {{ ticket.solicitante_nombre }}
+{% if ticket.solicitante_email %}Correo:         {{ ticket.solicitante_email }}{% endif %}
+
+Descripción
+─────────────
+{{ ticket.descripcion }}
+
+Registrado:     {{ ticket.creado_en|date:"d/m/Y H:i" }}
+
+{% if url %}Atender el ticket: {{ url }}{% endif %}
+
+---
+Sistema de Tickets · Hoteles

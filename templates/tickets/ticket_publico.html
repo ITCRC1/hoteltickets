@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Reportar incidencia{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body p-4 p-md-5">
+                <h2 class="mb-1"><i class="bi bi-clipboard-plus text-primary"></i> Reportar incidencia de TI</h2>
+                <p class="text-muted mb-4">Completa el formulario para registrar tu reporte. Quedará constancia con fecha y hora.</p>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <div class="row g-3">
+                        <!-- Hotel + Prioridad lado a lado -->
+                        <div class="col-md-7">
+                            <label class="form-label fw-bold">{{ form.hotel.label }} *</label>
+                            {{ form.hotel }}
+                            {% if form.hotel.errors %}<div class="text-danger small">{{ form.hotel.errors|join:", " }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label fw-bold">{{ form.prioridad.label }}</label>
+                            {{ form.prioridad }}
+                        </div>
+
+                       <!-- {# Para reactivar el campo Categoría, descomenta este bloque
+                           y ajusta los col-md-* de Hotel y Prioridad de arriba:
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">{{ form.categoria.label }} *</label>
+                            {{ form.categoria }}
+                            {% if form.categoria.errors %}<div class="text-danger small">{{ form.categoria.errors|join:", " }}</div>{% endif %}
+                        </div>
+                        #}-->
+
+                        <div class="col-12">
+                            <label class="form-label fw-bold">{{ form.titulo.label }} *</label>
+                            {{ form.titulo }}
+                            {% if form.titulo.errors %}<div class="text-danger small">{{ form.titulo.errors|join:", " }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-bold">{{ form.descripcion.label }} *</label>
+                            {{ form.descripcion }}
+                            {% if form.descripcion.errors %}<div class="text-danger small">{{ form.descripcion.errors|join:", " }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-bold">{{ form.ubicacion_especifica.label }}</label>
+                            {{ form.ubicacion_especifica }}
+                        </div>
+
+                        <hr class="my-2">
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">{{ form.solicitante_nombre.label }} *</label>
+                            {{ form.solicitante_nombre }}
+                            {% if form.solicitante_nombre.errors %}<div class="text-danger small">{{ form.solicitante_nombre.errors|join:", " }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">{{ form.solicitante_email.label }}</label>
+                            {{ form.solicitante_email }}
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-send"></i> Enviar reporte
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

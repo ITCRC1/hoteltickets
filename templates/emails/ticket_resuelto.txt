@@ -1,0 +1,18 @@
+Hola {{ ticket.solicitante_nombre }},
+
+¡Buenas noticias! Tu ticket #{{ ticket.id }} ha sido marcado como RESUELTO.
+
+Detalle
+────────
+Título:        {{ ticket.titulo }}
+Hotel:         {{ ticket.hotel.nombre }}
+Categoría:     {{ ticket.categoria.nombre }}
+Registrado:    {{ ticket.creado_en|date:"d/m/Y H:i" }}
+Resuelto:      {{ ticket.resuelto_en|date:"d/m/Y H:i" }}
+{% with tiempo=ticket.tiempo_resolucion %}{% if tiempo %}Tiempo total:  {{ tiempo }}{% endif %}{% endwith %}
+
+Si consideras que el problema NO está resuelto, por favor responde a este
+correo o crea un nuevo ticket con el número de referencia #{{ ticket.id }}.
+
+Gracias por tu paciencia,
+Sistema de Tickets · Hoteles

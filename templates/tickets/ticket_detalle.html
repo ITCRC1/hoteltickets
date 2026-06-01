@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Ticket #{{ ticket.id }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <a href="{% url 'ticket_lista' %}" class="text-decoration-none small">&larr; Volver a la lista</a>
+        <h2 class="mt-1">#{{ ticket.id }} · {{ ticket.titulo }}</h2>
+        <div>
+            <span class="badge bg-{{ ticket.color_estado }} me-1">{{ ticket.get_estado_display }}</span>
+            <span class="badge bg-{{ ticket.color_prioridad }} me-1">{{ ticket.get_prioridad_display }}</span>
+            <span class="badge" style="background:{{ ticket.categoria.color }}">{{ ticket.categoria.nombre }}</span>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Columna principal -->
+    <div class="col-lg-8">
+        <!-- Descripción -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <h6 class="text-uppercase text-muted small">Descripción</h6>
+                <p class="mb-3" style="white-space: pre-line">{{ ticket.descripcion }}</p>
+
+                <div class="row small">
+                    <div class="col-md-6 mb-2">
+                        <strong>Hotel:</strong> {{ ticket.hotel.nombre }}
+                    </div>
+                    {% if ticket.ubicacion_especifica %}
+                    <div class="col-md-6 mb-2">
+                        <strong>Ubicación:</strong> {{ ticket.ubicacion_especifica }}
+                    </div>
+                    {% endif %}
+                    <div class="col-md-6 mb-2">
+                        <strong>Solicitante:</strong> {{ ticket.solicitante_nombre }}
+                    </div>
+                    {% if ticket.solicitante_email %}
+                    <div class="col-md-6 mb-2">
+                        <strong>Email:</strong> <a href="mailto:{{ ticket.solicitante_email }}">{{ ticket.solicitante_email }}</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline: comentarios + auditoría -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <ul class="nav nav-pills mb-3">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="pill" href="#tab-comentarios">
+                            <i class="bi bi-chat-left-text"></i> Comentarios ({{ comentarios|length }})
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="pill" href="#tab-auditoria">
+                            <i class="bi bi-shield-check"></i> Bitácora completa ({{ auditoria|length }})
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <!-- Comentarios -->
+                    <div class="tab-pane fade show active" id="tab-comentarios">
+                        {% if comentarios %}
+                        <div class="timeline">
+                            {% for c in comentarios %}
+                            <div class="timeline-item">
+                                <div class="d-flex justify-content-between">
+                                    <strong>{{ c.autor.get_full_name|default:c.autor.username }}</strong>
+                                    <small class="text-muted" title="{{ c.creado_en|date:'d/m/Y H:i:s' }}">{{ c.creado_en|naturaltime }}</small>
+                                </div>
+                                {% if c.interno %}<span class="badge bg-warning text-dark">Nota interna</span>{% endif %}
+                                <p class="mb-0 mt-1" style="white-space: pre-line">{{ c.contenido }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="text-muted text-center py-3">Aún no hay comentarios.</p>
+                        {% endif %}
+
+                        <!-- Formulario de comentario -->
+                        <form method="post" class="mt-4 pt-3 border-top">
+                            {% csrf_token %}
+                            <input type="hidden" name="accion" value="comentar">
+                            <label class="form-label small fw-bold">Añadir comentario / actualización</label>
+                            {{ form_comentario.contenido }}
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <div class="form-check">
+                                    {{ form_comentario.interno }}
+                                    <label class="form-check-label small">Nota interna</label>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-send"></i> Publicar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Auditoría -->
+                    <div class="tab-pane fade" id="tab-auditoria">
+                        <p class="text-muted small">Registro inmutable de cada acción. Esta es la evidencia.</p>
+                        {% if auditoria %}
+                        <div class="timeline">
+                            {% for a in auditoria %}
+                            <div class="timeline-item audit">
+                                <div class="d-flex justify-content-between">
+                                    <span>
+                                        <strong>{{ a.get_accion_display }}</strong>
+                                        por {{ a.usuario_nombre|default:"Sistema" }}
+                                    </span>
+                                    <small class="text-muted">{{ a.creado_en|date:"d/m/Y H:i:s" }}</small>
+                                </div>
+                                {% if a.detalle %}<small class="text-muted">{{ a.detalle }}</small>{% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="text-muted text-center py-3">Sin registros de auditoría todavía.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar de gestión -->
+    <div class="col-lg-4">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h6 class="text-uppercase text-muted small">Gestión</h6>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="accion" value="gestion">
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Estado</label>
+                        {{ form_gestion.estado }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Prioridad</label>
+                        {{ form_gestion.prioridad }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Asignado a</label>
+                        {{ form_gestion.asignado_a }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Categoría</label>
+                        {{ form_gestion.categoria }}
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-save"></i> Guardar cambios
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <h6 class="text-uppercase text-muted small">Tiempos</h6>
+                <table class="table table-sm small mb-0">
+                    <tr><td>Creado</td><td class="text-end">{{ ticket.creado_en|date:"d/m/Y H:i" }}</td></tr>
+                    {% if ticket.primera_respuesta_en %}
+                    <tr><td>1ra respuesta</td><td class="text-end">{{ ticket.primera_respuesta_en|date:"d/m/Y H:i" }}</td></tr>
+                    <tr><td>T. respuesta</td><td class="text-end fw-bold text-info">{{ ticket.tiempo_respuesta }}</td></tr>
+                    {% endif %}
+                    {% if ticket.resuelto_en %}
+                    <tr><td>Resuelto</td><td class="text-end">{{ ticket.resuelto_en|date:"d/m/Y H:i" }}</td></tr>
+                    <tr><td>T. resolución</td><td class="text-end fw-bold text-success">{{ ticket.tiempo_resolucion }}</td></tr>
+                    {% endif %}
+                    {% if ticket.cerrado_en %}
+                    <tr><td>Cerrado</td><td class="text-end">{{ ticket.cerrado_en|date:"d/m/Y H:i" }}</td></tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

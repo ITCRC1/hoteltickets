@@ -1,0 +1,14 @@
+Hola {{ ticket.solicitante_nombre }},
+
+Hay una actualización en tu ticket #{{ ticket.id }} ({{ ticket.titulo }}):
+
+──────────────────────────────────────────
+{{ comentario.contenido }}
+──────────────────────────────────────────
+— {{ comentario.autor.get_full_name|default:comentario.autor.username }}
+  {{ comentario.creado_en|date:"d/m/Y H:i" }}
+
+Estado actual del ticket: {{ ticket.get_estado_display }}
+
+---
+Sistema de Tickets · Hoteles

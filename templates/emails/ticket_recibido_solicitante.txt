@@ -1,0 +1,23 @@
+Hola {{ ticket.solicitante_nombre }},
+
+Recibimos tu reporte y quedó registrado con el siguiente número:
+
+  TICKET #{{ ticket.id }}
+
+Resumen
+─────────
+Título:        {{ ticket.titulo }}
+Hotel:         {{ ticket.hotel.nombre }}
+Categoría:     {{ ticket.categoria.nombre }}
+Prioridad:     {{ ticket.get_prioridad_display }}
+Registrado:    {{ ticket.creado_en|date:"d/m/Y H:i" }}
+
+Próximos pasos
+───────────────
+Nuestro equipo lo revisará y te enviaremos actualizaciones a este correo
+cuando haya novedades.
+
+Si necesitas referirte a este reporte, usa el número #{{ ticket.id }}.
+
+Gracias,
+Sistema de Tickets · Hoteles
