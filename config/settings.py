@@ -129,6 +129,7 @@ DEFAULT_FROM_EMAIL = config(
     'DEFAULT_FROM_EMAIL',
     default='Sistema de Tickets <noreply@example.com>'
 )
+EMAIL_TIMEOUT = 10
 # Lista de correos que reciben notificación cuando entra un ticket nuevo
 NOTIFICATION_EMAILS = config('NOTIFICATION_EMAILS', default='', cast=Csv())
 
