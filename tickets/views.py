@@ -191,7 +191,7 @@ def ticket_lista(request):
 def ticket_detalle(request, pk):
     """Detalle, edición de gestión y comentarios."""
     ticket = get_object_or_404(
-        Ticket.objects.select_related('hotel', 'categoria', 'asignado_a', 'solicitante_usuario'),
+        Ticket.objects.select_related('hotel', 'categoria', 'asignado_a'),
         pk=pk,
     )
 

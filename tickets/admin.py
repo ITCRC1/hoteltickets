@@ -60,7 +60,7 @@ class TicketAdmin(admin.ModelAdmin):
             'fields': ('titulo', 'descripcion', 'hotel', 'categoria', 'ubicacion_especifica')
         }),
         ('Solicitante', {
-            'fields': ('solicitante_nombre', 'solicitante_email', 'solicitante_usuario')
+            'fields': ('solicitante_nombre', 'solicitante_email')
         }),
         ('Gestión', {
             'fields': ('prioridad', 'estado', 'asignado_a')

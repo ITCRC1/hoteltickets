@@ -76,21 +76,32 @@ def notificar_ticket_creado(ticket):
 
 
 def notificar_comentario(comentario):
-    """Cuando se añade un comentario público al ticket."""
-    if comentario.interno:
-        return  # las notas internas no se envían al solicitante
+    """Cuando se añade un comentario al ticket.
+
+    Las notas internas notifican sólo a los técnicos/admins.
+    Los comentarios públicos notifican a técnicos/admins y al solicitante.
+    """
     ticket = comentario.ticket
-    if ticket.solicitante_email:
-        _enviar(
-            asunto=f'[Ticket #{ticket.id}] Nueva actualización',
-            plantilla='ticket_comentario',
-            contexto={
-                'ticket': ticket,
-                'comentario': comentario,
-                'url': _construir_url(ticket),
-            },
-            destinatarios=[ticket.solicitante_email],
-        )
+    admins = getattr(settings, 'NOTIFICATION_EMAILS', [])
+    destinatarios = [email for email in admins if email]
+
+    if not comentario.interno and ticket.solicitante_email:
+        destinatarios.append(ticket.solicitante_email)
+
+    destinatarios = list(dict.fromkeys(destinatarios))
+    if not destinatarios:
+        return
+
+    _enviar(
+        asunto=f'[Ticket #{ticket.id}] Nueva actualización',
+        plantilla='ticket_comentario',
+        contexto={
+            'ticket': ticket,
+            'comentario': comentario,
+            'url': _construir_url(ticket),
+        },
+        destinatarios=destinatarios,
+    )
 
 
 def notificar_resolucion(ticket):

@@ -103,11 +103,6 @@ class Ticket(models.Model):
         help_text='Correo del solicitante para notificaciones',
         default='',
     )
-    solicitante_usuario = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, blank=True,
-        related_name='tickets_creados',
-        help_text='Usuario del sistema, si el reporte fue hecho con cuenta'
-    )
     asignado_a = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True,
         related_name='tickets_asignados'

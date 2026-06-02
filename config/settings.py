@@ -107,6 +107,11 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
 
+# Sesión de inactividad corta para usuarios admin
+# Django actualiza el timeout en cada petición si SESSION_SAVE_EVERY_REQUEST=True.
+SESSION_COOKIE_AGE = 60
+SESSION_SAVE_EVERY_REQUEST = True
+
 # ==== CORREO ====
 # Por defecto en desarrollo los correos salen por consola (no se envían realmente).
 # En producción configura las variables EMAIL_* en .env.
