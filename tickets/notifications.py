@@ -11,6 +11,8 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.urls import reverse
+import requests
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -28,8 +30,33 @@ def _enviar(asunto, plantilla, contexto, destinatarios):
     destinatarios = [d for d in destinatarios if d]
     if not destinatarios:
         return
+    # If a BREVO API key is configured, prefer sending via Brevo API (HTTP)
+    brevo_key = getattr(settings, 'BREVO_API_KEY', '')
+    cuerpo = render_to_string(f'emails/{plantilla}.txt', contexto)
+    if brevo_key:
+        try:
+            payload = {
+                "sender": {"name": settings.DEFAULT_FROM_EMAIL.split('<')[0].strip(),
+                           "email": settings.DEFAULT_FROM_EMAIL.split('<')[-1].replace('>', '').strip()},
+                "to": [{"email": d} for d in destinatarios],
+                "subject": asunto,
+                "textContent": cuerpo,
+            }
+            headers = {
+                'api-key': brevo_key,
+                'Content-Type': 'application/json'
+            }
+            resp = requests.post('https://api.brevo.com/v3/smtp/email', json=payload, headers=headers, timeout=10)
+            if resp.status_code >= 200 and resp.status_code < 300:
+                logger.info('Correo enviado via Brevo: %s → %s', asunto, destinatarios)
+            else:
+                logger.error('Error Brevo %s %s %s', resp.status_code, resp.text, destinatarios)
+        except Exception as exc:
+            logger.error('Error enviando correo via Brevo "%s": %s', asunto, exc)
+        return
+
+    # Fallback: use Django SMTP backend
     try:
-        cuerpo = render_to_string(f'emails/{plantilla}.txt', contexto)
         msg = EmailMultiAlternatives(
             subject=asunto,
             body=cuerpo,
