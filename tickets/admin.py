@@ -5,9 +5,9 @@ from .models import Hotel, Categoria, Ticket, Comentario, RegistroAuditoria
 
 @admin.register(Hotel)
 class HotelAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'ubicacion', 'contacto_principal', 'telefono', 'activo')
+    list_display = ('nombre', 'ubicacion', 'oficina', 'contacto_principal', 'telefono', 'activo')
     list_filter = ('activo',)
-    search_fields = ('nombre', 'ubicacion')
+    search_fields = ('nombre', 'ubicacion', 'oficina')
 
 
 @admin.register(Categoria)
@@ -57,7 +57,7 @@ class TicketAdmin(admin.ModelAdmin):
     inlines = [ComentarioInline, AuditoriaInline]
     fieldsets = (
         ('Información', {
-            'fields': ('titulo', 'descripcion', 'hotel', 'categoria', 'ubicacion_especifica')
+            'fields': ('titulo', 'descripcion', 'hotel', 'categoria')
         }),
         ('Solicitante', {
             'fields': ('solicitante_nombre', 'solicitante_email')
@@ -74,7 +74,7 @@ class TicketAdmin(admin.ModelAdmin):
     def badge_prioridad(self, obj):
         return format_html(
             '<span class="badge" style="background:#{}">{}</span>',
-            {'baja': '6c757d', 'media': '0dcaf0', 'alta': 'fd7e14', 'urgente': 'dc3545'}.get(obj.prioridad, '6c757d'),
+            {'baja': '6c757d', 'media': '0dcaf0', 'alta': 'fd7e14'}.get(obj.prioridad, '6c757d'),
             obj.get_prioridad_display()
         )
     badge_prioridad.short_description = 'Prioridad'

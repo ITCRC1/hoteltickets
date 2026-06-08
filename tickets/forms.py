@@ -25,7 +25,6 @@ class TicketPublicoForm(forms.ModelForm):
             # 'categoria',   # ← oculto temporalmente (ver nota arriba)
             'prioridad',
             'titulo', 'descripcion',
-            'ubicacion_especifica',
             'solicitante_nombre', 'solicitante_email',
         ]
         widgets = {
@@ -41,10 +40,6 @@ class TicketPublicoForm(forms.ModelForm):
                 'rows': 5,
                 'placeholder': 'Describe el problema con el mayor detalle posible: qué pasa, desde cuándo, qué se intentó.',
             }),
-            'ubicacion_especifica': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Ej: Recepción, oficina administrativa, habitación 305',
-            }),
             'solicitante_nombre': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Tu nombre completo',
@@ -57,10 +52,9 @@ class TicketPublicoForm(forms.ModelForm):
         labels = {
             'titulo': 'Título del reporte',
             'descripcion': 'Descripción detallada',
-            'ubicacion_especifica': 'Ubicación específica',
             'solicitante_nombre': 'Tu nombre',
             'solicitante_email': 'Tu correo electrónico',
-            'prioridad': '¿Qué tan urgente es?',
+            'prioridad': 'Prioridad',
         }
 
     def __init__(self, *args, **kwargs):

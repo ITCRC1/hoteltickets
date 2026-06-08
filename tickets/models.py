@@ -15,7 +15,8 @@ from django.utils import timezone
 class Hotel(models.Model):
     """Cada propiedad/hotel del grupo."""
     nombre = models.CharField(max_length=100, unique=True)
-    ubicacion = models.CharField(max_length=200, blank=True)
+    ubicacion = models.CharField('Ubicación', max_length=200, blank=True)
+    oficina = models.CharField('Oficina', max_length=100, blank=True)
     contacto_principal = models.CharField(max_length=100, blank=True)
     telefono = models.CharField(max_length=30, blank=True)
     activo = models.BooleanField(default=True)
@@ -57,7 +58,6 @@ class Ticket(models.Model):
         ('baja', 'Baja'),
         ('media', 'Media'),
         ('alta', 'Alta'),
-        ('urgente', 'Urgente'),
     ]
     ESTADO_CHOICES = [
         ('abierto', 'Abierto'),
@@ -70,7 +70,6 @@ class Ticket(models.Model):
         'baja': 'secondary',
         'media': 'info',
         'alta': 'warning',
-        'urgente': 'danger',
     }
     ESTADO_COLORES = {
         'abierto': 'primary',
