@@ -71,12 +71,7 @@
                 {% for t in tickets %}
                 <tr style="cursor:pointer" onclick="window.location='{% url 'ticket_detalle' t.pk %}'">
                     <td><strong>#{{ t.id }}</strong></td>
-                    <td>
-                        {{ t.titulo }}
-                        {% if t.ubicacion_especifica %}
-                        <div class="small text-muted"><i class="bi bi-geo-alt"></i> {{ t.ubicacion_especifica }}</div>
-                        {% endif %}
-                    </td>
+                    <td>{{ t.titulo }}</td>
                     <td>{{ t.hotel.nombre }}</td>
                     <td><span class="badge" style="background:{{ t.categoria.color }}">{{ t.categoria.nombre }}</span></td>
                     <td><span class="badge bg-{{ t.color_prioridad }}">{{ t.get_prioridad_display }}</span></td>

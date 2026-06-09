@@ -116,12 +116,6 @@ def dashboard(request):
     # Tickets recientes
     recientes = tickets.select_related('hotel', 'categoria', 'asignado_a')[:8]
 
-    # Tickets urgentes pendientes
-    urgentes_abiertos = tickets.filter(
-        prioridad='urgente',
-        estado__in=['abierto', 'en_progreso', 'en_espera']
-    ).select_related('hotel', 'categoria')[:5]
-
     context = {
         'total': total,
         'abiertos': abiertos,
@@ -137,7 +131,6 @@ def dashboard(request):
         'por_categoria': por_categoria,
         'por_prioridad': por_prioridad,
         'recientes': recientes,
-        'urgentes_abiertos': urgentes_abiertos,
     }
     return render(request, 'tickets/dashboard.html', context)
 
@@ -166,8 +159,7 @@ def ticket_lista(request):
         qs = qs.filter(
             Q(titulo__icontains=buscar) |
             Q(descripcion__icontains=buscar) |
-            Q(solicitante_nombre__icontains=buscar) |
-            Q(ubicacion_especifica__icontains=buscar)
+            Q(solicitante_nombre__icontains=buscar)
         )
 
     context = {

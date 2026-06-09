@@ -54,25 +54,6 @@
     </div>
 </div>
 
-<!-- Urgentes -->
-{% if urgentes_abiertos %}
-<div class="card mb-4 border-danger">
-    <div class="card-header bg-danger text-white">
-        <i class="bi bi-exclamation-triangle-fill"></i> Tickets URGENTES sin cerrar ({{ urgentes_abiertos|length }})
-    </div>
-    <div class="list-group list-group-flush">
-        {% for t in urgentes_abiertos %}
-        <a href="{% url 'ticket_detalle' t.pk %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-            <div>
-                <strong>#{{ t.id }} · {{ t.titulo }}</strong>
-                <div class="small text-muted">{{ t.hotel }} · {{ t.categoria }} · creado {{ t.creado_en|naturaltime }}</div>
-            </div>
-            <span class="badge bg-{{ t.color_estado }}">{{ t.get_estado_display }}</span>
-        </a>
-        {% endfor %}
-    </div>
-</div>
-{% endif %}
 
 <div class="row g-3 mb-4">
     <!-- Estado actual -->

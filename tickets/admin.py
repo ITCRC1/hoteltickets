@@ -8,6 +8,7 @@ class HotelAdmin(admin.ModelAdmin):
     list_display = ('nombre', 'ubicacion', 'oficina', 'contacto_principal', 'telefono', 'activo')
     list_filter = ('activo',)
     search_fields = ('nombre', 'ubicacion', 'oficina')
+    fields = ('nombre', 'ubicacion', 'oficina', 'contacto_principal', 'telefono', 'activo')
 
 
 @admin.register(Categoria)
@@ -51,7 +52,7 @@ class TicketAdmin(admin.ModelAdmin):
         'solicitante_nombre', 'asignado_a', 'creado_en',
     )
     list_filter = ('estado', 'prioridad', 'hotel', 'categoria', 'asignado_a')
-    search_fields = ('titulo', 'descripcion', 'solicitante_nombre', 'solicitante_email', 'ubicacion_especifica')
+    search_fields = ('titulo', 'descripcion', 'solicitante_nombre', 'solicitante_email')
     date_hierarchy = 'creado_en'
     readonly_fields = ('creado_en', 'actualizado_en', 'primera_respuesta_en', 'resuelto_en', 'cerrado_en')
     inlines = [ComentarioInline, AuditoriaInline]
