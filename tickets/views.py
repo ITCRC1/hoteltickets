@@ -37,6 +37,8 @@ def ticket_publico(request):
                 defaults={'color': '#0d6efd', 'descripcion': 'Computadoras, red, internet, software'},
             )
             ticket.categoria = categoria_default
+            # Asignación automática de prioridad (media por defecto)
+            ticket.prioridad = 'media'
             ticket.save()
 
             RegistroAuditoria.registrar(

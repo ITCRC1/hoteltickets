@@ -23,14 +23,12 @@ class TicketPublicoForm(forms.ModelForm):
         fields = [
             'hotel',
             # 'categoria',   # ← oculto temporalmente (ver nota arriba)
-            'prioridad',
             'titulo', 'descripcion',
             'solicitante_nombre', 'solicitante_email',
         ]
         widgets = {
             'hotel': forms.Select(attrs={'class': 'form-select form-select-lg'}),
             # 'categoria': forms.Select(attrs={'class': 'form-select form-select-lg'}),
-            'prioridad': forms.Select(attrs={'class': 'form-select form-select-lg'}),
             'titulo': forms.TextInput(attrs={
                 'class': 'form-control form-control-lg',
                 'placeholder': 'Resumen breve. Ej: "PC de recepción no enciende"',
@@ -50,11 +48,11 @@ class TicketPublicoForm(forms.ModelForm):
             }),
         }
         labels = {
+            'hotel': 'Ubicación',
             'titulo': 'Título del reporte',
             'descripcion': 'Descripción detallada',
             'solicitante_nombre': 'Tu nombre',
             'solicitante_email': 'Tu correo electrónico',
-            'prioridad': 'Prioridad',
         }
 
     def __init__(self, *args, **kwargs):
