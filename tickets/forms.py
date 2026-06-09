@@ -29,10 +29,7 @@ class TicketPublicoForm(forms.ModelForm):
         widgets = {
             'hotel': forms.Select(attrs={'class': 'form-select form-select-lg'}),
             # 'categoria': forms.Select(attrs={'class': 'form-select form-select-lg'}),
-            'titulo': forms.TextInput(attrs={
-                'class': 'form-control form-control-lg',
-                'placeholder': 'Resumen breve. Ej: "PC de recepción no enciende"',
-            }),
+            'titulo': forms.HiddenInput(),
             'descripcion': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 5,
