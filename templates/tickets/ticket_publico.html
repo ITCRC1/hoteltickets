@@ -42,14 +42,6 @@
                                 <option value="Incidencia con sistema de restaurante">Incidencia con sistema de restaurante</option>
                                 <option value="__otro__">Otra incidencia...</option>
                             </select>
-                            <input
-                                id="titulo_custom"
-                                type="text"
-                                class="form-control form-control-lg mt-3 d-none"
-                                placeholder="Describe la incidencia aquí"
-                            />
-                            <small class="text-muted d-block mb-2">Selecciona una incidencia común o escribe tu propia descripción si no aparece.</small>
-                            {% if form.titulo.errors %}<div class="text-danger small mt-1">{{ form.titulo.errors|join:", " }}</div>{% endif %}
                             <script>
                                 document.addEventListener('DOMContentLoaded', function () {
                                     const tituloInput = document.querySelector('input[name="titulo"]');
