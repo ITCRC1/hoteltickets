@@ -1,21 +1,13 @@
 from django import forms
-from .models import Ticket, Comentario, Hotel, Categoria
+from .models import Ticket, Comentario, Hotel
 
 
 class TicketPublicoForm(forms.ModelForm):
     """
-    Formulario público — el que llena el staff de hoteles SIN necesidad de login.
+    Formulario público — el que llena el staff de hoteles sin necesidad de login.
 
-    Nota: por ahora el sistema solo se usa para el área de TI, así que el campo
-    'categoria' está oculto. En la vista `ticket_publico` se asigna automáticamente
-    a "IT / Sistemas".
-
-    Para volver a mostrar la categoría cuando se sume otra área:
-      1. Añade 'categoria' a la lista de fields de abajo.
-      2. Añade su widget al diccionario widgets.
-      3. Descomenta el filtro de queryset en __init__.
-      4. En el template ticket_publico.html, restaura el bloque del campo.
-      5. Quita la asignación automática en views.ticket_publico.
+    El campo ‘titulo’ se guarda desde el select público y la opción de texto
+    libre "Otra incidencia...".
     """
 
     class Meta:
@@ -55,7 +47,6 @@ class TicketPublicoForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['hotel'].queryset = Hotel.objects.filter(activo=True)
-        # self.fields['categoria'].queryset = Categoria.objects.filter(activa=True)
 
 
 class TicketGestionForm(forms.ModelForm):

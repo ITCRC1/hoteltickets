@@ -28,65 +28,66 @@
                         </div>
 
                         <div class="col-12">
-                                {{ form.titulo }}
-                        <label class="form-label fw-semibold text-secondary small text-uppercase">Título del reporte <span class="text-danger">*</span></label>
-                        <select id="titulo_select" class="form-select form-select-lg">
-                            <option value="">Elige una incidencia</option>
-                            <option value="UPS dañada">UPS dañada</option>
-                            <option value="Impresora no funciona">Impresora no funciona</option>
-                            <option value="PC / laptop no funciona">PC / laptop no funciona</option>
-                            <option value="No hay conexión a Internet">No hay conexión a Internet</option>
-                            <option value="Problema con IPTV/Cable">Problema con IPTV/Cable</option>
-                            <option value="Correo electrónico no funciona">Correo electrónico no funciona</option>
-                            <option value="Incidencia con sistema de reservas">Incidencia con sistema de reservas</option>
-                            <option value="Incidencia con sistema de restaurante">Incidencia con sistema de restaurante</option>
-                            <option value="__otro__">Otra incidencia...</option>
-                        </select>
-                        <input
-                            id="titulo_custom"
-                            type="text"
-                            class="form-control form-control-lg mt-3 d-none"
-                            placeholder="Describe la incidencia aquí"
-                        />
-                        {% if form.titulo.errors %}<div class="text-danger small mt-1">{{ form.titulo.errors|join:", " }}</div>{% endif %}
-                        <script>
-                            document.addEventListener('DOMContentLoaded', function () {
-                                const tituloInput = document.querySelector('input[name="titulo"]');
-                                const select = document.getElementById('titulo_select');
-                                const custom = document.getElementById('titulo_custom');
+                            {{ form.titulo }}
+                            <label class="form-label fw-semibold text-secondary small text-uppercase">Título del reporte <span class="text-danger">*</span></label>
+                            <select id="titulo_select" class="form-select form-select-lg">
+                                <option value="">Elige una incidencia común</option>
+                                <option value="UPS dañada">UPS dañada</option>
+                                <option value="Impresora no funciona">Impresora no funciona</option>
+                                <option value="PC / laptop no funciona">PC / laptop no funciona</option>
+                                <option value="No hay conexión a Internet">No hay conexión a Internet</option>
+                                <option value="Problema con IPTV/Cable">Problema con IPTV/Cable</option>
+                                <option value="Correo electrónico no funciona">Correo electrónico no funciona</option>
+                                <option value="Incidencia con sistema de reservas">Incidencia con sistema de reservas</option>
+                                <option value="Incidencia con sistema de restaurante">Incidencia con sistema de restaurante</option>
+                                <option value="__otro__">Otra incidencia...</option>
+                            </select>
+                            <input
+                                id="titulo_custom"
+                                type="text"
+                                class="form-control form-control-lg mt-3 d-none"
+                                placeholder="Describe la incidencia aquí"
+                            />
+                            <small class="text-muted d-block mb-2">Selecciona una incidencia común o escribe tu propia descripción si no aparece.</small>
+                            {% if form.titulo.errors %}<div class="text-danger small mt-1">{{ form.titulo.errors|join:", " }}</div>{% endif %}
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    const tituloInput = document.querySelector('input[name="titulo"]');
+                                    const select = document.getElementById('titulo_select');
+                                    const custom = document.getElementById('titulo_custom');
 
-                                function updateHidden(value) {
-                                    tituloInput.value = value || '';
-                                }
+                                    function updateHidden(value) {
+                                        tituloInput.value = value || '';
+                                    }
 
-                                select.addEventListener('change', function () {
-                                    if (select.value === '__otro__') {
-                                        custom.classList.remove('d-none');
-                                        custom.focus();
+                                    select.addEventListener('change', function () {
+                                        if (select.value === '__otro__') {
+                                            custom.classList.remove('d-none');
+                                            custom.focus();
+                                            updateHidden(custom.value);
+                                        } else {
+                                            custom.classList.add('d-none');
+                                            custom.value = '';
+                                            updateHidden(select.value);
+                                        }
+                                    });
+
+                                    custom.addEventListener('input', function () {
                                         updateHidden(custom.value);
-                                    } else {
-                                        custom.classList.add('d-none');
-                                        custom.value = '';
-                                        updateHidden(select.value);
+                                    });
+
+                                    if (tituloInput.value) {
+                                        const existing = Array.from(select.options).find(opt => opt.value === tituloInput.value);
+                                        if (existing) {
+                                            select.value = tituloInput.value;
+                                        } else {
+                                            select.value = '__otro__';
+                                            custom.classList.remove('d-none');
+                                            custom.value = tituloInput.value;
+                                        }
                                     }
                                 });
-
-                                custom.addEventListener('input', function () {
-                                    updateHidden(custom.value);
-                                });
-
-                                if (tituloInput.value) {
-                                    const existing = Array.from(select.options).find(opt => opt.value === tituloInput.value);
-                                    if (existing) {
-                                        select.value = tituloInput.value;
-                                    } else {
-                                        select.value = '__otro__';
-                                        custom.classList.remove('d-none');
-                                        custom.value = tituloInput.value;
-                                    }
-                                }
-                            });
-                        </script>
+                            </script>
                         </div>
 
                         <div class="col-12">
