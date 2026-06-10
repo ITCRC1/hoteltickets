@@ -1,5 +1,6 @@
-{% extends 'base.html' %} {% block title %}Reportar incidencia{% endblock %} {%
-block content %}
+{% extends 'base.html' %}
+{% block title %}Reportar incidencia{% endblock %}
+{% block content %}
 <div class="row justify-content-center">
   <div class="col-lg-7 col-xl-6">
     <div class="card shadow-sm">
@@ -96,8 +97,7 @@ block content %}
                 >{{ form.solicitante_nombre.label }}
                 <span class="text-danger">*</span></label
               >
-              {{ form.solicitante_nombre }} {% if form.solicitante_nombre.errors
-              %}
+              {{ form.solicitante_nombre }} {% if form.solicitante_nombre.errors %}
               <div class="text-danger small mt-1">
                 {{ form.solicitante_nombre.errors|join:", " }}
               </div>
@@ -109,8 +109,7 @@ block content %}
                 >{{ form.solicitante_email.label }}
                 <span class="text-danger">*</span></label
               >
-              {{ form.solicitante_email }} {% if form.solicitante_email.errors
-              %}
+              {{ form.solicitante_email }} {% if form.solicitante_email.errors %}
               <div class="text-danger small mt-1">
                 {{ form.solicitante_email.errors|join:", " }}
               </div>
