@@ -37,8 +37,6 @@ def ticket_publico(request):
                 defaults={'color': '#0d6efd', 'descripcion': 'Computadoras, red, internet, software'},
             )
             ticket.categoria = categoria_default
-            # Asignación automática de prioridad (media por defecto)
-            ticket.prioridad = 'media'
             ticket.save()
 
             RegistroAuditoria.registrar(
@@ -110,11 +108,6 @@ def dashboard(request):
         .order_by('-total')[:10]
     )
 
-    # Distribución por prioridad
-    por_prioridad = list(
-        tickets.values('prioridad').annotate(total=Count('id')).order_by('prioridad')
-    )
-
     # Tickets recientes
     recientes = tickets.select_related('hotel', 'categoria', 'asignado_a')[:8]
 
@@ -131,7 +124,6 @@ def dashboard(request):
         'tiempo_resolucion_promedio': tiempo_resolucion_promedio,
         'por_hotel': por_hotel,
         'por_categoria': por_categoria,
-        'por_prioridad': por_prioridad,
         'recientes': recientes,
     }
     return render(request, 'tickets/dashboard.html', context)
@@ -145,7 +137,6 @@ def ticket_lista(request):
     # Filtros
     estado = request.GET.get('estado')
     hotel = request.GET.get('hotel')
-    prioridad = request.GET.get('prioridad')
     categoria = request.GET.get('categoria')
     buscar = request.GET.get('q', '').strip()
 
@@ -153,8 +144,6 @@ def ticket_lista(request):
         qs = qs.filter(estado=estado)
     if hotel:
         qs = qs.filter(hotel_id=hotel)
-    if prioridad:
-        qs = qs.filter(prioridad=prioridad)
     if categoria:
         qs = qs.filter(categoria_id=categoria)
     if buscar:
@@ -169,11 +158,9 @@ def ticket_lista(request):
         'hoteles': Hotel.objects.filter(activo=True),
         'categorias': Categoria.objects.filter(activa=True),
         'estados': Ticket.ESTADO_CHOICES,
-        'prioridades': Ticket.PRIORIDAD_CHOICES,
         'filtros': {
             'estado': estado or '',
             'hotel': hotel or '',
-            'prioridad': prioridad or '',
             'categoria': categoria or '',
             'q': buscar,
         },
@@ -191,7 +178,6 @@ def ticket_detalle(request, pk):
 
     # Estados anteriores para detectar cambios al guardar el form de gestión
     estado_anterior = ticket.estado
-    prioridad_anterior = ticket.prioridad
     asignado_anterior = ticket.asignado_a_id
 
     if request.method == 'POST':
@@ -226,11 +212,6 @@ def ticket_detalle(request, pk):
                     # Notificar al solicitante si pasó a resuelto
                     if t.estado == 'resuelto' and estado_anterior != 'resuelto':
                         notifications.notificar_resolucion(t)
-                if t.prioridad != prioridad_anterior:
-                    RegistroAuditoria.registrar(
-                        ticket=t, accion='cambio_prioridad', usuario=request.user,
-                        detalle=f'De "{dict(Ticket.PRIORIDAD_CHOICES)[prioridad_anterior]}" a "{t.get_prioridad_display()}"'
-                    )
                 if t.asignado_a_id != asignado_anterior:
                     nombre = t.asignado_a.get_full_name() or t.asignado_a.username if t.asignado_a else 'Sin asignar'
                     RegistroAuditoria.registrar(

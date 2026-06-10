@@ -9,7 +9,6 @@
         <h2 class="mt-1">#{{ ticket.id }} · {{ ticket.titulo }}</h2>
         <div>
             <span class="badge bg-{{ ticket.color_estado }} me-1">{{ ticket.get_estado_display }}</span>
-            <span class="badge bg-{{ ticket.color_prioridad }} me-1">{{ ticket.get_prioridad_display }}</span>
             <span class="badge" style="background:{{ ticket.categoria.color }}">{{ ticket.categoria.nombre }}</span>
         </div>
     </div>
@@ -131,10 +130,6 @@
                     <div class="mb-3">
                         <label class="form-label small fw-bold">Estado</label>
                         {{ form_gestion.estado }}
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold">Prioridad</label>
-                        {{ form_gestion.prioridad }}
                     </div>
                     <div class="mb-3">
                         <label class="form-label small fw-bold">Asignado a</label>

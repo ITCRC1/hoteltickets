@@ -54,11 +54,6 @@ class Categoria(models.Model):
 class Ticket(models.Model):
     """Una incidencia o solicitud reportada."""
 
-    PRIORIDAD_CHOICES = [
-        ('baja', 'Baja'),
-        ('media', 'Media'),
-        ('alta', 'Alta'),
-    ]
     ESTADO_CHOICES = [
         ('abierto', 'Abierto'),
         ('en_progreso', 'En progreso'),
@@ -66,11 +61,6 @@ class Ticket(models.Model):
         ('resuelto', 'Resuelto'),
         ('cerrado', 'Cerrado'),
     ]
-    PRIORIDAD_COLORES = {
-        'baja': 'secondary',
-        'media': 'info',
-        'alta': 'warning',
-    }
     ESTADO_COLORES = {
         'abierto': 'primary',
         'en_progreso': 'info',
@@ -90,7 +80,6 @@ class Ticket(models.Model):
     )
 
     # Clasificación
-    prioridad = models.CharField(max_length=10, choices=PRIORIDAD_CHOICES, default='media')
     estado = models.CharField(max_length=15, choices=ESTADO_CHOICES, default='abierto', db_index=True)
 
     # Personas
@@ -126,10 +115,6 @@ class Ticket(models.Model):
 
     def get_absolute_url(self):
         return reverse('ticket_detalle', kwargs={'pk': self.pk})
-
-    @property
-    def color_prioridad(self):
-        return self.PRIORIDAD_COLORES.get(self.prioridad, 'secondary')
 
     @property
     def color_estado(self):
@@ -179,7 +164,6 @@ class RegistroAuditoria(models.Model):
         ('crear', 'Ticket creado'),
         ('editar', 'Datos editados'),
         ('cambio_estado', 'Cambio de estado'),
-        ('cambio_prioridad', 'Cambio de prioridad'),
         ('asignar', 'Asignación'),
         ('comentar', 'Comentario añadido'),
         ('resolver', 'Resuelto'),

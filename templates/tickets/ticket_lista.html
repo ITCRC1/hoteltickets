@@ -21,14 +21,6 @@
                 </select>
             </div>
             <div class="col-md-2">
-                <select name="prioridad" class="form-select">
-                    <option value="">Prioridad</option>
-                    {% for v, l in prioridades %}
-                    <option value="{{ v }}" {% if filtros.prioridad == v %}selected{% endif %}>{{ l }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-2">
                 <select name="hotel" class="form-select">
                     <option value="">Hotel</option>
                     {% for h in hoteles %}
@@ -61,7 +53,6 @@
                     <th>Título</th>
                     <th>Hotel</th>
                     <th>Categoría</th>
-                    <th>Prioridad</th>
                     <th>Estado</th>
                     <th>Asignado a</th>
                     <th>Creado</th>
@@ -74,13 +65,12 @@
                     <td>{{ t.titulo }}</td>
                     <td>{{ t.hotel.nombre }}</td>
                     <td><span class="badge" style="background:{{ t.categoria.color }}">{{ t.categoria.nombre }}</span></td>
-                    <td><span class="badge bg-{{ t.color_prioridad }}">{{ t.get_prioridad_display }}</span></td>
                     <td><span class="badge bg-{{ t.color_estado }}">{{ t.get_estado_display }}</span></td>
                     <td>{% if t.asignado_a %}{{ t.asignado_a.get_full_name|default:t.asignado_a.username }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
                     <td><small class="text-muted" title="{{ t.creado_en|date:'d/m/Y H:i' }}">{{ t.creado_en|naturaltime }}</small></td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="8" class="text-center text-muted py-5">No hay tickets que coincidan con los filtros</td></tr>
+                <tr><td colspan="7" class="text-center text-muted py-5">No hay tickets que coincidan con los filtros</td></tr>
                 {% endfor %}
             </tbody>
         </table>

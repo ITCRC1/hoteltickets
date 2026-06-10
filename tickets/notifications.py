@@ -86,7 +86,7 @@ def notificar_ticket_creado(ticket):
         # descomenta la siguiente línea:
         # destinatarios = admins + [fincontroller_email, isaac_email]
         _enviar(
-            asunto=f'Nuevo ticket · {ticket.get_prioridad_display()} · {ticket.titulo}',
+            asunto=f'Nuevo ticket · {ticket.titulo}',
             plantilla='ticket_creado_admin',
             contexto=contexto,
             destinatarios=destinatarios,

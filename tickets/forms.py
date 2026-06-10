@@ -55,10 +55,9 @@ class TicketGestionForm(forms.ModelForm):
 
     class Meta:
         model = Ticket
-        fields = ['estado', 'prioridad', 'asignado_a', 'categoria']
+        fields = ['estado', 'asignado_a', 'categoria']
         widgets = {
             'estado': forms.Select(attrs={'class': 'form-select'}),
-            'prioridad': forms.Select(attrs={'class': 'form-select'}),
             'asignado_a': forms.Select(attrs={'class': 'form-select'}),
             'categoria': forms.Select(attrs={'class': 'form-select'}),
         }

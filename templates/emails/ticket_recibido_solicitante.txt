@@ -7,9 +7,8 @@ Recibimos tu reporte y quedó registrado con el siguiente número:
 Resumen
 ─────────
 Título:        {{ ticket.titulo }}
-Hotel:         {{ ticket.hotel.nombre }}
+Ubicación:     {{ ticket.hotel.nombre }}
 Categoría:     {{ ticket.categoria.nombre }}
-Prioridad:     {{ ticket.get_prioridad_display }}
 Registrado:    {{ ticket.creado_en|date:"d/m/Y H:i" }}
 
 Próximos pasos

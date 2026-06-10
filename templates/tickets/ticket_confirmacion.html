@@ -12,9 +12,8 @@
 
                 <div class="bg-light rounded p-3 my-4 text-start">
                     <p class="mb-1"><strong>Número:</strong> #{{ ticket.id }}</p>
-                    <p class="mb-1"><strong>Hotel:</strong> {{ ticket.hotel }}</p>
+                    <p class="mb-1"><strong>Ubicación:</strong> {{ ticket.hotel }}</p>
                     <p class="mb-1"><strong>Título:</strong> {{ ticket.titulo }}</p>
-                    <p class="mb-1"><strong>Prioridad:</strong> {{ ticket.get_prioridad_display }}</p>
                     <p class="mb-0"><strong>Registrado:</strong> {{ ticket.creado_en|date:"d/m/Y H:i" }}</p>
                 </div>
 

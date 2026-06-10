@@ -48,10 +48,10 @@ class AuditoriaInline(admin.TabularInline):
 class TicketAdmin(admin.ModelAdmin):
     list_display = (
         'id', 'titulo', 'hotel', 'categoria',
-        'badge_prioridad', 'badge_estado',
+        'badge_estado',
         'solicitante_nombre', 'asignado_a', 'creado_en',
     )
-    list_filter = ('estado', 'prioridad', 'hotel', 'categoria', 'asignado_a')
+    list_filter = ('estado', 'hotel', 'categoria', 'asignado_a')
     search_fields = ('titulo', 'descripcion', 'solicitante_nombre', 'solicitante_email')
     date_hierarchy = 'creado_en'
     readonly_fields = ('creado_en', 'actualizado_en', 'primera_respuesta_en', 'resuelto_en', 'cerrado_en')
@@ -64,7 +64,7 @@ class TicketAdmin(admin.ModelAdmin):
             'fields': ('solicitante_nombre', 'solicitante_email')
         }),
         ('Gestión', {
-            'fields': ('prioridad', 'estado', 'asignado_a')
+            'fields': ('estado', 'asignado_a')
         }),
         ('Fechas', {
             'fields': ('creado_en', 'actualizado_en', 'primera_respuesta_en', 'resuelto_en', 'cerrado_en'),
