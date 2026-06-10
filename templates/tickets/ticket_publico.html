@@ -68,6 +68,11 @@
                   Incidencia con sistema de restaurante
                 </option>
               </select>
+              {% if form.titulo.errors %}
+              <div class="text-danger small mt-1">
+                {{ form.titulo.errors|join:", " }}
+              </div>
+              {% endif %}
             </div>
 
             <div class="col-12">
@@ -124,6 +129,16 @@
           </div>
         </form>
       </div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const tituloSelect = document.getElementById('titulo_select');
+    const tituloInput = document.getElementById('id_titulo');
+    if (!tituloSelect || !tituloInput) return;
+    const syncTitulo = () => { tituloInput.value = tituloSelect.value; };
+    syncTitulo();
+    tituloSelect.addEventListener('change', syncTitulo);
+  });
+</script>
     </div>
   </div>
 </div>
