@@ -40,46 +40,7 @@
                                 <option value="Correo electrónico no funciona">Correo electrónico no funciona</option>
                                 <option value="Incidencia con sistema de reservas">Incidencia con sistema de reservas</option>
                                 <option value="Incidencia con sistema de restaurante">Incidencia con sistema de restaurante</option>
-                                <option value="__otro__">Otra incidencia...</option>
                             </select>
-                            <script>
-                                document.addEventListener('DOMContentLoaded', function () {
-                                    const tituloInput = document.querySelector('input[name="titulo"]');
-                                    const select = document.getElementById('titulo_select');
-                                    const custom = document.getElementById('titulo_custom');
-
-                                    function updateHidden(value) {
-                                        tituloInput.value = value || '';
-                                    }
-
-                                    select.addEventListener('change', function () {
-                                        if (select.value === '__otro__') {
-                                            custom.classList.remove('d-none');
-                                            custom.focus();
-                                            updateHidden(custom.value);
-                                        } else {
-                                            custom.classList.add('d-none');
-                                            custom.value = '';
-                                            updateHidden(select.value);
-                                        }
-                                    });
-
-                                    custom.addEventListener('input', function () {
-                                        updateHidden(custom.value);
-                                    });
-
-                                    if (tituloInput.value) {
-                                        const existing = Array.from(select.options).find(opt => opt.value === tituloInput.value);
-                                        if (existing) {
-                                            select.value = tituloInput.value;
-                                        } else {
-                                            select.value = '__otro__';
-                                            custom.classList.remove('d-none');
-                                            custom.value = tituloInput.value;
-                                        }
-                                    }
-                                });
-                            </script>
                         </div>
 
                         <div class="col-12">
