@@ -10,6 +10,6 @@ urlpatterns = [
 ]
 
 # Personalizar títulos del admin
-admin.site.site_header = 'Sistema de Tickets - Hoteles'
-admin.site.site_title = 'Tickets Hoteles'
+admin.site.site_header = 'Sistema de Tickets'
+admin.site.site_title = 'Sistema de Tickets'
 admin.site.index_title = 'Administración'

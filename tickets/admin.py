@@ -1,6 +1,9 @@
 from django.contrib import admin
+from django.contrib.auth.models import Group
 from django.utils.html import format_html
 from .models import Hotel, Categoria, Ticket, Comentario, RegistroAuditoria
+
+admin.site.unregister(Group)
 
 
 @admin.register(Hotel)
@@ -72,14 +75,6 @@ class TicketAdmin(admin.ModelAdmin):
         }),
     )
 
-    def badge_prioridad(self, obj):
-        return format_html(
-            '<span class="badge" style="background:#{}">{}</span>',
-            {'baja': '6c757d', 'media': '0dcaf0', 'alta': 'fd7e14'}.get(obj.prioridad, '6c757d'),
-            obj.get_prioridad_display()
-        )
-    badge_prioridad.short_description = 'Prioridad'
-
     def badge_estado(self, obj):
         return format_html(
             '<span class="badge" style="background:#{};color:#fff;padding:3px 8px;border-radius:4px">{}</span>',
@@ -90,20 +85,3 @@ class TicketAdmin(admin.ModelAdmin):
     badge_estado.short_description = 'Estado'
 
 
-@admin.register(RegistroAuditoria)
-class RegistroAuditoriaAdmin(admin.ModelAdmin):
-    list_display = ('creado_en', 'ticket', 'usuario_nombre', 'accion', 'detalle_corto')
-    list_filter = ('accion', 'creado_en')
-    search_fields = ('ticket__titulo', 'usuario_nombre', 'detalle')
-    date_hierarchy = 'creado_en'
-    readonly_fields = ('ticket', 'usuario', 'usuario_nombre', 'accion', 'detalle', 'creado_en')
-
-    def detalle_corto(self, obj):
-        return obj.detalle[:60] + ('…' if len(obj.detalle) > 60 else '')
-    detalle_corto.short_description = 'Detalle'
-
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
