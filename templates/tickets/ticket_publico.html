@@ -67,7 +67,14 @@
                 <option value="Incidencia con sistema de restaurante">
                   Incidencia con sistema de restaurante
                 </option>
+                <option value="Otra incidencia...">Otra incidencia...</option>
               </select>
+              <input
+                type="text"
+                id="titulo_otro"
+                class="form-control form-control-lg mt-2 d-none"
+                placeholder="Describe brevemente el título de tu incidencia"
+              />
               {% if form.titulo.errors %}
               <div class="text-danger small mt-1">
                 {{ form.titulo.errors|join:", " }}
@@ -133,10 +140,21 @@
   document.addEventListener('DOMContentLoaded', function () {
     const tituloSelect = document.getElementById('titulo_select');
     const tituloInput = document.getElementById('id_titulo');
-    if (!tituloSelect || !tituloInput) return;
-    const syncTitulo = () => { tituloInput.value = tituloSelect.value; };
+    const tituloOtro = document.getElementById('titulo_otro');
+    if (!tituloSelect || !tituloInput || !tituloOtro) return;
+    const syncTitulo = () => {
+      if (tituloSelect.value === 'Otra incidencia...') {
+        tituloOtro.classList.remove('d-none');
+        tituloInput.value = tituloOtro.value;
+      } else {
+        tituloOtro.classList.add('d-none');
+        tituloOtro.value = '';
+        tituloInput.value = tituloSelect.value;
+      }
+    };
     syncTitulo();
     tituloSelect.addEventListener('change', syncTitulo);
+    tituloOtro.addEventListener('input', () => { tituloInput.value = tituloOtro.value; });
   });
 </script>
     </div>
