@@ -43,7 +43,7 @@
                 <div class="kpi-label">T. resolución</div>
                 <div class="kpi-number text-warning">
                     {% if tiempo_resolucion_promedio %}
-                        {{ tiempo_resolucion_promedio|timesince|truncatewords:1 }}
+                        {{ tiempo_resolucion_promedio }}
                     {% else %}
                         —
                     {% endif %}

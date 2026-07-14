@@ -92,6 +92,19 @@ def dashboard(request):
         duracion=ExpressionWrapper(F('resuelto_en') - F('creado_en'), output_field=DurationField())
     ).aggregate(promedio=Avg('duracion'))['promedio']
 
+    if tiempo_resolucion_promedio is not None:
+        total_minutos = int(tiempo_resolucion_promedio.total_seconds() // 60)
+        dias, resto = divmod(total_minutos, 60 * 24)
+        horas, minutos = divmod(resto, 60)
+        if dias:
+            tiempo_resolucion_texto = f'{dias}d {horas}h'
+        elif horas:
+            tiempo_resolucion_texto = f'{horas}h {minutos}m'
+        else:
+            tiempo_resolucion_texto = f'{minutos}m'
+    else:
+        tiempo_resolucion_texto = None
+
     # Distribución por hotel
     por_hotel = (
         tickets.values('hotel__nombre')
@@ -121,7 +134,7 @@ def dashboard(request):
         'tickets_7d': tickets_7d,
         'resueltos_7d': resueltos_7d,
         'resueltos_30d': resueltos_30d,
-        'tiempo_resolucion_promedio': tiempo_resolucion_promedio,
+        'tiempo_resolucion_promedio': tiempo_resolucion_texto,
         'por_hotel': por_hotel,
         'por_categoria': por_categoria,
         'recientes': recientes,
