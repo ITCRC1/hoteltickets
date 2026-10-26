@@ -1,0 +1,10 @@
+# Nunca versionar datos reales ni secretos
+.env
+.local/
+db.sqlite3
+db.sqlite3-journal
+venv/
+__pycache__/
+*.pyc
+staticfiles/
+.git/

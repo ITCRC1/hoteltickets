@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "tickets",
+      "runtimeExecutable": "C:/dev/hoteltickets/venv/Scripts/python.exe",
+      "runtimeArgs": ["C:/dev/hoteltickets/manage.py", "runserver", "8001"],
+      "port": 8001
+    }
+  ]
+}
