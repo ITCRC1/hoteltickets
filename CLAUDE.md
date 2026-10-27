@@ -59,7 +59,7 @@ Sin `DATABASE_URL` usa SQLite (`db.sqlite3`); en Railway usa Postgres.
   contra staging: `scripts\prod_manage.py --staging <comando>` (pide STAGING).
 - **Migraciones:** Railway no corre `release:` (es de Heroku); por eso el `web:` del Procfile hace `migrate` al
   arrancar (desde la Etapa 2). Probar siempre la migración en staging antes de pasar a `main`.
-- Tests: `.env\Scripts\python.exe manage.py test` (con `DATABASE_URL` vacío → SQLite).
+- Tests: `.\venv\Scripts\python.exe manage.py test` (con `DATABASE_URL` vacío → SQLite).
 - Migración nueva: `.\venv\Scripts\python.exe manage.py makemigrations tickets`
 - Railway CLI: lo instaló la app de Claude en su AppData virtualizado, el PowerShell del usuario no lo ve;
   los scripts lo encuentran solos.
