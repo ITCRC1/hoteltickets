@@ -146,3 +146,11 @@ Estimación en **sesiones de trabajo** (una sesión ≈ medio día).
 7. **IA: solo Claude (Anthropic).** Sin comparación de proveedores. El asistente dentro de la app usa la
    API de Anthropic con su propia clave (variable en Railway) y costo por uso; se configura en la etapa 11
    con autorización.
+8. **Alta de usuarios por invitación (igual que Owner Dashboard y Hotel Consolidation).** El admin
+   crea el usuario (correo, nombre, rol) → la app genera un **link de un solo uso, válido 7 días**, que
+   se muestra una sola vez con botón *Copiar* → el admin lo envía por el medio que quiera → la persona
+   abre el link, define su contraseña (10+ caracteres, letras y números, distinta del correo) y entra.
+   Botón **"Link de invitación"** en cada usuario para generar uno nuevo (quien no entró u olvidó su
+   clave); el anterior deja de servir. En la base solo se guarda la huella SHA-256 del token. Lista de
+   usuarios con estado *invitación pendiente* / último ingreso. Auditoría: INVITAR y ACEPTAR_INVITACIÓN.
+   El admin nunca conoce ni escribe contraseñas ajenas.
