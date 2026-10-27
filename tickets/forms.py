@@ -62,6 +62,20 @@ class TicketGestionForm(forms.ModelForm):
             'categoria': forms.Select(attrs={'class': 'form-select'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Solo se asigna a quien atiende: Administrador o IT Support, activos.
+        from django.contrib.auth.models import User
+        from django.db.models import Q
+        from core import roles
+        atienden = User.objects.filter(is_active=True).filter(
+            Q(is_superuser=True) | Q(groups__name__in=[roles.ADMIN, roles.IT])).distinct()
+        actual = self.instance.asignado_a_id
+        if actual:  # conservar al asignado actual aunque ya no tenga rol, para no perderlo al guardar
+            atienden = User.objects.filter(Q(pk__in=atienden.values('pk')) | Q(pk=actual))
+        self.fields['asignado_a'].queryset = atienden.order_by('first_name', 'username')
+        self.fields['asignado_a'].label_from_instance = lambda u: u.get_full_name() or u.username
+
 
 class ComentarioForm(forms.ModelForm):
     class Meta:

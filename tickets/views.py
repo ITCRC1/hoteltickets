@@ -8,7 +8,6 @@ Hay dos zonas:
 from datetime import timedelta
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Avg, Q, F, ExpressionWrapper, DurationField
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
@@ -16,6 +15,7 @@ from django.utils import timezone
 from .models import Ticket, Hotel, Categoria, Comentario, RegistroAuditoria
 from .forms import TicketPublicoForm, TicketGestionForm, ComentarioForm
 from . import notifications
+from core import roles
 
 
 # ------------------ PÚBLICAS ------------------
@@ -61,7 +61,7 @@ def ticket_confirmacion(request, pk):
 
 # ------------------ PRIVADAS (con login) ------------------
 
-@login_required
+@roles.requiere_rol()
 def dashboard(request):
     """
     Dashboard con métricas. Esta es la 'vitrina' del trabajo realizado.
@@ -142,7 +142,7 @@ def dashboard(request):
     return render(request, 'tickets/dashboard.html', context)
 
 
-@login_required
+@roles.requiere_rol()
 def ticket_lista(request):
     """Lista filtrable de todos los tickets."""
     qs = Ticket.objects.select_related('hotel', 'categoria', 'asignado_a').all()
@@ -181,7 +181,7 @@ def ticket_lista(request):
     return render(request, 'tickets/ticket_lista.html', context)
 
 
-@login_required
+@roles.requiere_rol()
 def ticket_detalle(request, pk):
     """Detalle, edición de gestión y comentarios."""
     ticket = get_object_or_404(
@@ -194,6 +194,9 @@ def ticket_detalle(request, pk):
     asignado_anterior = ticket.asignado_a_id
 
     if request.method == 'POST':
+        # Solo Administrador e IT Support modifican; Solo lectura consulta (validado aquí, no solo en la plantilla).
+        if not roles.puede_editar(request.user):
+            return roles.denegado(request, 'Tu rol es de solo lectura: no puedes modificar tickets.')
         accion = request.POST.get('accion')
 
         if accion == 'gestion':

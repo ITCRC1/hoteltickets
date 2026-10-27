@@ -1,0 +1,25 @@
+{% extends 'base_auth.html' %}
+{% block title %}Crear contraseña{% endblock %}
+
+{% block content %}
+<h1 class="h4 mb-1">Crea tu contraseña</h1>
+<p class="text-muted small mb-3">Hola <strong>{{ invitado.get_full_name|default:invitado.email }}</strong> ({{ invitado.email }}). Define tu contraseña para entrar al panel de Soporte TI.</p>
+
+{% if form.non_field_errors %}
+<div class="alert alert-danger small">{{ form.non_field_errors|join:" " }}</div>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label class="form-label" for="{{ form.password1.id_for_label }}">{{ form.password1.label }}</label>
+        {{ form.password1 }}
+        <div class="form-text">Mínimo 10 caracteres, con letras y números, distinta de tu correo.</div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label" for="{{ form.password2.id_for_label }}">{{ form.password2.label }}</label>
+        {{ form.password2 }}
+    </div>
+    <button type="submit" class="btn btn-primary w-100">Guardar y entrar</button>
+</form>
+{% endblock %}

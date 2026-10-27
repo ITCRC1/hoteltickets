@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'core',
     'tickets',
 ]
 
@@ -51,6 +52,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context.plataforma',
             ],
         },
     },
@@ -92,7 +94,8 @@ WHITENOISE_USE_FINDERS = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Autenticación
+# Autenticación (usuario o correo)
+AUTHENTICATION_BACKENDS = ['core.backends.UsuarioOCorreoBackend']
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'ticket_publico'

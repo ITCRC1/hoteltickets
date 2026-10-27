@@ -8,10 +8,10 @@ admin.site.unregister(Group)
 
 @admin.register(Hotel)
 class HotelAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'ubicacion', 'oficina', 'contacto_principal', 'telefono', 'activo')
-    list_filter = ('activo',)
+    list_display = ('nombre', 'tipo', 'ubicacion', 'oficina', 'contacto_principal', 'telefono', 'activo')
+    list_filter = ('tipo', 'activo')
     search_fields = ('nombre', 'ubicacion', 'oficina')
-    fields = ('nombre', 'ubicacion', 'oficina', 'contacto_principal', 'telefono', 'activo')
+    fields = ('nombre', 'tipo', 'ubicacion', 'oficina', 'contacto_principal', 'telefono', 'activo')
 
 
 @admin.register(Categoria)

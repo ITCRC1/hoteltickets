@@ -1,0 +1,11 @@
+{% extends 'base_auth.html' %}
+{% block title %}Link no válido{% endblock %}
+
+{% block content %}
+<h1 class="h4 mb-2"><i class="bi bi-link-45deg"></i> Link no válido</h1>
+<p class="mb-0">Este link de invitación ya se usó, venció o fue reemplazado por uno nuevo. Pide un link nuevo al administrador.</p>
+{% endblock %}
+
+{% block pie %}
+<p class="text-center small mt-3"><a href="{% url 'login' %}">Ir a iniciar sesión</a></p>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Auditoría{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-1"><i class="bi bi-shield-check"></i> Auditoría</h1>
+<p class="text-muted mb-4">Registro inmutable de accesos y acciones administrativas. Las acciones sobre cada ticket se ven además en su propia bitácora.</p>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-2">
+            <div class="col-md-4"><input type="text" name="q" class="form-control" placeholder="Buscar usuario, registro o detalle…" value="{{ filtros.q }}"></div>
+            <div class="col-md-3">
+                <select name="modulo" class="form-select" aria-label="Módulo">
+                    <option value="">Todos los módulos</option>
+                    {% for m in modulos %}<option value="{{ m }}" {% if filtros.modulo == m %}selected{% endif %}>{{ m }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="accion" class="form-select" aria-label="Acción">
+                    <option value="">Todas las acciones</option>
+                    {% for a in acciones %}<option value="{{ a }}" {% if filtros.accion == a %}selected{% endif %}>{{ a }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-md-1"><button class="btn btn-primary w-100" aria-label="Filtrar"><i class="bi bi-search"></i></button></div>
+            <div class="col-md-1"><a href="{% url 'auditoria' %}" class="btn btn-outline-secondary w-100" title="Limpiar filtros"><i class="bi bi-x-lg"></i></a></div>
+        </form>
+    </div>
+</div>
+
+<p class="small text-muted">{{ total }} registro{{ total|pluralize }}</p>
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+            <thead><tr><th>Fecha</th><th>Usuario</th><th>Módulo</th><th>Acción</th><th>Registro</th><th>Detalle / cambios</th><th>IP</th></tr></thead>
+            <tbody>
+            {% for a in pagina %}
+                <tr>
+                    <td class="small text-nowrap">{{ a.creado_en|date:"d/m/Y H:i:s" }}</td>
+                    <td class="small">{{ a.usuario_nombre }}</td>
+                    <td class="small">{{ a.modulo }}</td>
+                    <td><span class="badge badge-soft">{{ a.accion }}</span></td>
+                    <td class="small">{{ a.objeto }}</td>
+                    <td class="small">
+                        {% if a.detalle %}<div>{{ a.detalle }}</div>{% endif %}
+                        {% for campo, valores in a.cambios.items %}
+                            <div><strong>{{ campo }}</strong>: {{ valores.0|default:"—" }} → {{ valores.1|default:"—" }}</div>
+                        {% endfor %}
+                    </td>
+                    <td class="small text-muted">{{ a.ip|default:"" }}</td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="7" class="text-center text-muted py-4">Sin registros.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if pagina.has_other_pages %}
+<nav class="mt-3" aria-label="Páginas">
+    <ul class="pagination pagination-sm">
+        {% if pagina.has_previous %}<li class="page-item"><a class="page-link" href="?{% if filtros.q %}q={{ filtros.q|urlencode }}&{% endif %}modulo={{ filtros.modulo }}&accion={{ filtros.accion }}&page={{ pagina.previous_page_number }}">Anterior</a></li>{% endif %}
+        <li class="page-item disabled"><span class="page-link">Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span></li>
+        {% if pagina.has_next %}<li class="page-item"><a class="page-link" href="?{% if filtros.q %}q={{ filtros.q|urlencode }}&{% endif %}modulo={{ filtros.modulo }}&accion={{ filtros.accion }}&page={{ pagina.next_page_number }}">Siguiente</a></li>{% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

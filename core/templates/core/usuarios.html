@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Usuarios{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-1"><i class="bi bi-people"></i> Usuarios</h1>
+<p class="text-muted mb-4">Crea el usuario y envíale el link: la persona define su propia contraseña. Nadie más la conoce.</p>
+
+{% if link %}
+<div class="card mb-4" style="border-color: var(--tc-gold)">
+    <div class="card-body">
+        <h2 class="h6 mb-1"><i class="bi bi-envelope-paper"></i> Link de invitación para {{ link.nombre|default:link.email }}</h2>
+        <p class="small text-muted mb-2">Envíaselo por el medio que prefieras (WhatsApp, correo, Teams). Sirve una sola vez y vence en {{ link.dias }} días.
+            <strong>Se muestra solo ahora</strong>: si se pierde, genera otro con "Link de invitación".</p>
+        <div class="input-group">
+            <input type="text" class="form-control" id="link-invitacion" value="{{ link.url }}" readonly>
+            <button class="btn btn-primary" type="button" id="copiar"><i class="bi bi-clipboard"></i> Copiar</button>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h2 class="h6 text-uppercase text-muted mb-3">Nuevo usuario</h2>
+        <form method="post" class="row g-2 align-items-end">
+            {% csrf_token %}
+            <div class="col-md-3">
+                <label class="form-label small" for="{{ form_nuevo.email.id_for_label }}">Correo</label>
+                {{ form_nuevo.email }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small" for="{{ form_nuevo.nombre.id_for_label }}">Nombre</label>
+                {{ form_nuevo.nombre }}
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small" for="{{ form_nuevo.rol.id_for_label }}">Rol</label>
+                {{ form_nuevo.rol }}
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small" for="{{ form_nuevo.departamento.id_for_label }}">Departamento</label>
+                {{ form_nuevo.departamento }}
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100"><i class="bi bi-person-plus"></i> Crear e invitar</button>
+            </div>
+            {% if form_nuevo.errors %}
+            <div class="col-12"><div class="alert alert-danger small mb-0 mt-2">
+                {% for campo, errores in form_nuevo.errors.items %}{{ errores|join:" " }} {% endfor %}
+            </div></div>
+            {% endif %}
+        </form>
+        <p class="small text-muted mt-3 mb-0">
+            <strong>Administrador</strong>: todo, incluidos usuarios y configuración ·
+            <strong>IT Support</strong>: atiende tickets, sin administrar ·
+            <strong>Solo lectura</strong>: consulta y filtra, sin modificar.
+        </p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Usuario</th><th>Nombre</th><th>Rol</th><th>Departamento</th><th class="text-center">Activo</th>
+                    <th>Último ingreso</th><th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for fila in lista %}
+                <tr class="{% if not fila.u.is_active %}opacity-50{% endif %}">
+                    <td class="small">{{ fila.u.email|default:fila.u.username }}</td>
+                    <td style="min-width: 170px"><input form="f{{ fila.u.pk }}" type="text" name="{{ fila.form.nombre.html_name }}" value="{{ fila.form.nombre.value }}" class="form-control form-control-sm" aria-label="Nombre" required></td>
+                    <td>
+                        <select form="f{{ fila.u.pk }}" name="{{ fila.form.rol.html_name }}" class="form-select form-select-sm" style="min-width: 150px" aria-label="Rol">
+                            {% for r in roles %}<option value="{{ r }}" {% if fila.form.rol.value == r %}selected{% endif %}>{{ r }}</option>{% endfor %}
+                        </select>
+                    </td>
+                    <td style="min-width: 140px"><input form="f{{ fila.u.pk }}" type="text" aria-label="Departamento" name="{{ fila.form.departamento.html_name }}" value="{{ fila.form.departamento.value|default:'' }}" class="form-control form-control-sm"></td>
+                    <td class="text-center"><input form="f{{ fila.u.pk }}" type="checkbox" name="{{ fila.form.activo.html_name }}" class="form-check-input" {% if fila.form.activo.value %}checked{% endif %}></td>
+                    <td class="small">
+                        {% if fila.u.last_login %}{{ fila.u.last_login|naturaltime }}
+                        {% elif fila.pendiente %}<span class="badge badge-soft">invitación pendiente</span>
+                        {% else %}<span class="text-muted">—</span>{% endif %}
+                    </td>
+                    <td class="text-end text-nowrap">
+                        <form id="f{{ fila.u.pk }}" method="post" action="{% url 'usuario_editar' fila.u.pk %}" class="d-inline">{% csrf_token %}
+                            <button class="btn btn-sm btn-primary" title="Guardar cambios"><i class="bi bi-save"></i></button>
+                        </form>
+                        {% if fila.u.is_active %}
+                        <form method="post" action="{% url 'usuario_invitar' fila.u.pk %}" class="d-inline"
+                              onsubmit="return confirm('¿Generar un link nuevo para {{ fila.u.email|default:fila.u.username|escapejs }}? El link anterior dejará de servir.');">
+                            {% csrf_token %}
+                            <button class="btn btn-sm btn-outline-primary" title="Link nuevo para crear o restablecer la contraseña"><i class="bi bi-link-45deg"></i> Link de invitación</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    (function () {
+        var b = document.getElementById('copiar');
+        if (!b) return;
+        b.addEventListener('click', function () {
+            var i = document.getElementById('link-invitacion');
+            i.select();
+            (navigator.clipboard ? navigator.clipboard.writeText(i.value) : Promise.reject())
+                .catch(function () { document.execCommand('copy'); })
+                .finally(function () { b.innerHTML = '<i class="bi bi-check2"></i> Copiado'; });
+        });
+    })();
+</script>
+{% endblock %}

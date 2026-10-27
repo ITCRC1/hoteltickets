@@ -14,11 +14,17 @@ Proyecto tomado por el Controller (fincontroller@seedcostarica.com) tras la sali
 - 2026-10-27: ambiente **staging** en Railway (rama `staging`, base propia con copia de prod, correos apagados):
   https://tickets-staging-bafe.up.railway.app — producción intacta.
 
+- 2026-10-27: **Etapa 2 (base) en staging**: panel oscuro con menú lateral (paleta TCRC), roles Administrador /
+  IT Support / Solo lectura verificados en el servidor, alta por link de invitación, login con correo, aviso de
+  sesión expirada (sesión 30 min), auditoría general (accesos y usuarios), ubicaciones con tipo Hotel / Punto
+  externo, migraciones automáticas al arrancar, 31 tests. Formulario público sin cambios.
+  Papelera se movió a la Etapa 3 (llega con el primer borrado: tickets).
+
 ### Pendiente
 - [ ] Revisar `NOTIFICATION_EMAILS` en Railway: puede seguir avisando al responsable anterior.
 - [ ] Correo del usuario `admin` (it@thecostaricacollection.com): confirmar quién tiene ese buzón
       (recuperación de contraseña).
-- [ ] No hay tests automáticos.
+- [ ] Papelera, prioridad y mejoras de tickets → Etapa 3.
 
 ### Datos de producción (26-oct)
 15 tickets · 7 ubicaciones (4 hoteles + oficinas Drake, Sierpe, Uvita) · 2 usuarios.

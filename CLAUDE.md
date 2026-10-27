@@ -24,6 +24,17 @@ Cada etapa: staging → pruebas → aprobación del Controller → producción. 
 - Refrescar staging con datos de prod: `scripts\copy_prod_to_staging.py` (solo lee prod; reemplaza staging).
 - Los scripts siempre pasan `-e production` / `-e staging` explícito; no dependen de `railway link`.
 
+## Roles y acceso (Etapa 2)
+- `core/roles.py`: **Administrador** (todo; = superusuario, entra al admin técnico), **IT Support** (atiende,
+  no administra), **Solo lectura**. Verificar SIEMPRE en la vista con `@roles.requiere_rol(...)` /
+  `roles.puede_editar()`; ocultar botones no basta. Sin rol → 403.
+- Alta por **invitación** (`core/invitaciones.py`, igual que Owner Dashboard): link de un solo uso, 7 días, solo
+  se guarda la huella SHA-256. El admin nunca escribe contraseñas ajenas.
+- Login con usuario o correo (`core/backends.py`); aviso de sesión expirada vía cookie `tk_sesion`.
+- Auditoría general: `core.auditoria.auditar(request, ACCION, modulo, objeto, cambios={campo: [antes, después]})`.
+- Plantillas: `base.html` = backstage (oscuro, menú lateral, CSS en `core/static/core/plataforma.css`);
+  `base_publico.html` = formulario público (no tocar); `base_auth.html` = login/invitación.
+
 ## Stack
 Django 5.0 · python-decouple (`.env`) · dj-database-url · gunicorn · whitenoise · django-anymail (Brevo).
 Sin `DATABASE_URL` usa SQLite (`db.sqlite3`); en Railway usa Postgres.
@@ -46,9 +57,9 @@ Sin `DATABASE_URL` usa SQLite (`db.sqlite3`); en Railway usa Postgres.
   `db.sqlite3`, respaldo en `.local/`).
 - Comando contra producción: `.\venv\Scripts\python.exe scripts\prod_manage.py <comando>` (pide escribir PROD);
   contra staging: `scripts\prod_manage.py --staging <comando>` (pide STAGING).
-- **Railway no corre la línea `release:` del Procfile** (es de Heroku): las migraciones nuevas hay que aplicarlas
-  a mano con `prod_manage.py [--staging] migrate`.
+- **Migraciones:** Railway no corre `release:` (es de Heroku); por eso el `web:` del Procfile hace `migrate` al
+  arrancar (desde la Etapa 2). Probar siempre la migración en staging antes de pasar a `main`.
+- Tests: `.env\Scripts\python.exe manage.py test` (con `DATABASE_URL` vacío → SQLite).
 - Migración nueva: `.\venv\Scripts\python.exe manage.py makemigrations tickets`
-- Tests: `.\venv\Scripts\python.exe manage.py test` (hoy no hay tests).
 - Railway CLI: lo instaló la app de Claude en su AppData virtualizado, el PowerShell del usuario no lo ve;
   los scripts lo encuentran solos.

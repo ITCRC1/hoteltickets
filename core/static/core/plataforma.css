@@ -1,0 +1,60 @@
+/* Paleta TCRC (misma familia que Owner Dashboard): verde bosque, dorado, arena. */
+:root, [data-bs-theme="light"] {
+    --tc-bg: #F2EFE8; --tc-surface: #FFFFFF; --tc-ink: #22302A; --tc-muted: #66705F; --tc-line: #E3DCCB;
+    --tc-accent: #25352B; --tc-accent-ink: #FFFFFF; --tc-gold: #B8924F; --tc-side: #1C2A22; --tc-side-ink: #F2EFE8;
+    --tc-side-muted: #A4AE9F; --tc-side-active: #2C3A30;
+}
+[data-bs-theme="dark"] {
+    --tc-bg: #121A15; --tc-surface: #1A241E; --tc-ink: #EEF0E8; --tc-muted: #A4AE9F; --tc-line: #2E3B32;
+    --tc-accent: #D6B97C; --tc-accent-ink: #121A15; --tc-gold: #D6B97C; --tc-side: #0E1511; --tc-side-ink: #EEF0E8;
+    --tc-side-muted: #8E998A; --tc-side-active: #1F2B24;
+}
+[data-bs-theme] {
+    --bs-body-bg: var(--tc-bg); --bs-body-color: var(--tc-ink); --bs-secondary-color: var(--tc-muted);
+    --bs-border-color: var(--tc-line); --bs-tertiary-bg: var(--tc-surface);
+    --bs-body-font-family: "Montserrat", "Helvetica Neue", system-ui, sans-serif; --bs-body-font-size: .9rem;
+    --bs-link-color-rgb: 46, 139, 134; --bs-link-hover-color-rgb: 46, 139, 134;
+}
+[data-bs-theme="dark"] { --bs-link-color-rgb: 110, 211, 207; --bs-link-hover-color-rgb: 150, 225, 222; }
+h1, h2, h3, .brand { font-family: "Libre Caslon Text", Georgia, serif; }
+.text-muted { color: var(--tc-muted) !important; }
+.card { background: var(--tc-surface); border: 1px solid var(--tc-line); border-radius: 10px; }
+.table { --bs-table-bg: transparent; }
+.btn-primary { --bs-btn-bg: var(--tc-accent); --bs-btn-border-color: var(--tc-accent); --bs-btn-color: var(--tc-accent-ink);
+    --bs-btn-hover-bg: var(--tc-gold); --bs-btn-hover-border-color: var(--tc-gold); --bs-btn-hover-color: var(--tc-accent-ink);
+    --bs-btn-active-bg: var(--tc-gold); --bs-btn-active-border-color: var(--tc-gold); }
+.btn-outline-primary { --bs-btn-color: var(--tc-accent); --bs-btn-border-color: var(--tc-accent);
+    --bs-btn-hover-bg: var(--tc-accent); --bs-btn-hover-border-color: var(--tc-accent); --bs-btn-hover-color: var(--tc-accent-ink); }
+.form-control, .form-select { background-color: var(--tc-bg); border-color: var(--tc-line); }
+
+/* Layout: menú lateral fijo en escritorio, deslizable en móvil */
+.sidebar { background: var(--tc-side); color: var(--tc-side-ink); width: 240px; border-right: 3px solid var(--tc-gold); }
+@media (min-width: 992px) {
+    .sidebar { position: fixed; top: 0; bottom: 0; left: 0; overflow-y: auto; }
+    .contenido { margin-left: 240px; }
+}
+.sidebar .brand { font-size: 1.35rem; font-weight: 700; color: var(--tc-side-ink); }
+.sidebar .brand small { display: block; font-family: "Montserrat", sans-serif; font-size: .65rem; letter-spacing: 2.4px;
+    text-transform: uppercase; color: var(--tc-gold); font-weight: 600; }
+.sidebar .grupo { font-size: .66rem; letter-spacing: 1.6px; text-transform: uppercase; color: var(--tc-gold);
+    font-weight: 600; margin: 1.1rem 0 .3rem; padding: 0 .75rem; }
+.sidebar .nav-link { color: var(--tc-side-muted); border-radius: 6px; padding: .45rem .75rem; display: flex; gap: .6rem; align-items: center; }
+.sidebar .nav-link:hover { color: var(--tc-side-ink); background: var(--tc-side-active); }
+.sidebar .nav-link.active { color: var(--tc-side-ink); background: var(--tc-side-active); box-shadow: inset 3px 0 0 var(--tc-gold); }
+.sidebar .usuario { border-top: 1px solid rgba(255,255,255,.08); font-size: .8rem; }
+.topbar { background: var(--tc-surface); border-bottom: 1px solid var(--tc-line); }
+
+/* Piezas que ya usan las pantallas de tickets */
+.kpi-card { transition: transform .15s; }
+.kpi-card:hover { transform: translateY(-2px); }
+.kpi-number { font-size: 2rem; font-weight: 700; line-height: 1; }
+.kpi-label { font-size: .75rem; color: var(--tc-muted); text-transform: uppercase; letter-spacing: .5px; }
+.timeline { border-left: 2px solid var(--tc-line); padding-left: 1.5rem; }
+.timeline-item { position: relative; padding-bottom: 1.25rem; }
+.timeline-item::before { content: ''; position: absolute; left: -1.6rem; top: .3rem; width: 14px; height: 14px;
+    border-radius: 50%; background: var(--tc-gold); border: 3px solid var(--tc-surface); box-shadow: 0 0 0 1px var(--tc-line); }
+.timeline-item.audit::before { background: var(--tc-muted); }
+.badge-soft { background: rgba(214,185,124,.15); color: var(--tc-gold); font-weight: 500; }
+.table-tickets td { vertical-align: middle; }
+.nav-pills .nav-link { color: var(--tc-muted); }
+.nav-pills .nav-link.active { background: var(--tc-accent); color: var(--tc-accent-ink); }

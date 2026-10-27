@@ -13,8 +13,15 @@ from django.utils import timezone
 
 
 class Hotel(models.Model):
-    """Cada propiedad/hotel del grupo."""
+    """Ubicación que requiere control de TI: un hotel o un punto estratégico fuera del hotel
+    (oficinas, etc.). La comparten tickets e inventario."""
+    TIPO_CHOICES = [
+        ('hotel', 'Hotel'),
+        ('punto_externo', 'Punto externo'),
+    ]
+
     nombre = models.CharField(max_length=100, unique=True)
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, default='hotel')
     ubicacion = models.CharField('Ubicación', max_length=200, blank=True)
     oficina = models.CharField('Oficina', max_length=100, blank=True)
     contacto_principal = models.CharField(max_length=100, blank=True)
@@ -24,8 +31,8 @@ class Hotel(models.Model):
 
     class Meta:
         ordering = ['nombre']
-        verbose_name = 'Hotel'
-        verbose_name_plural = 'Hoteles'
+        verbose_name = 'Ubicación'
+        verbose_name_plural = 'Ubicaciones'
 
     def __str__(self):
         return self.nombre
