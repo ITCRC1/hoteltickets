@@ -9,10 +9,13 @@ Uso (desde C:\\dev\\hoteltickets, con `railway link` hecho):
 import datetime
 import json
 import os
+import re
 import shutil
+import socket
 import subprocess
 import sys
 from pathlib import Path
+from urllib.parse import urlparse
 
 BASE = Path(__file__).resolve().parent.parent
 LOCAL = BASE / '.local'
@@ -39,13 +42,30 @@ def railway_cmd():
     sys.exit('No se encontró el CLI de Railway. Buscado en: ' + ', '.join(str(d) for d in dirs))
 
 
-def prod_url():
-    out = subprocess.run([railway_cmd(), 'variables', '-s', 'Postgres', '--json'],
+def prod_url(environment='production'):
+    """URL pública de la base del ambiente indicado (explícito: no depende de `railway link`)."""
+    out = subprocess.run([railway_cmd(), 'variables', '-s', 'Postgres', '-e', environment, '--json'],
                          capture_output=True, text=True, cwd=BASE, check=True).stdout
     url = json.loads(out).get('DATABASE_PUBLIC_URL')
     if not url:
-        sys.exit('No se encontró DATABASE_PUBLIC_URL en el servicio Postgres de Railway.')
-    return url
+        sys.exit(f'No se encontró DATABASE_PUBLIC_URL en el Postgres de {environment}.')
+    return _with_hostaddr(url)
+
+
+def _with_hostaddr(url):
+    """Si el DNS local no resuelve el host (p. ej. el router cacheó un 'no existe' de un proxy
+    recién creado), se resuelve con DNS público y se pasa como `hostaddr` a libpq."""
+    host = urlparse(url).hostname
+    try:
+        socket.getaddrinfo(host, None)
+        return url
+    except socket.gaierror:
+        pass
+    out = subprocess.run(['nslookup', host, '8.8.8.8'], capture_output=True, text=True).stdout
+    ips = re.findall(r'(\d+\.\d+\.\d+\.\d+)', out.split(host, 1)[-1])
+    if not ips:
+        sys.exit(f'No se pudo resolver {host}.')
+    return url + ('&' if '?' in url else '?') + f'hostaddr={ips[0]}'
 
 
 def manage(*args, env=None):

@@ -11,6 +11,9 @@ Proyecto tomado por el Controller (fincontroller@seedcostarica.com) tras la sali
 - Estructura de trabajo igual a los demás proyectos: `CLAUDE.md`, `PROGRESS.md`, `.claude/launch.json`,
   `start-local.cmd`, `.railwayignore`.
 
+- 2026-10-27: ambiente **staging** en Railway (rama `staging`, base propia con copia de prod, correos apagados):
+  https://tickets-staging-bafe.up.railway.app — producción intacta.
+
 ### Pendiente
 - [ ] Revisar `NOTIFICATION_EMAILS` en Railway: puede seguir avisando al responsable anterior.
 - [ ] Correo del usuario `admin` (it@thecostaricacollection.com): confirmar quién tiene ese buzón
