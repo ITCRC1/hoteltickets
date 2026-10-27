@@ -109,7 +109,8 @@ if not DEBUG:
 
 # Sesión de inactividad corta para usuarios admin
 # Django actualiza el timeout en cada petición si SESSION_SAVE_EVERY_REQUEST=True.
-SESSION_COOKIE_AGE = 60
+# Minutos sin actividad antes de pedir login otra vez (antes: 60 segundos).
+SESSION_COOKIE_AGE = config('SESSION_IDLE_MINUTES', default=30, cast=int) * 60
 SESSION_SAVE_EVERY_REQUEST = True
 
 # ==== CORREO ====
