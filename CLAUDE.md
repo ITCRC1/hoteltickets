@@ -1,7 +1,10 @@
 # CLAUDE.md — Hotel Tickets (TCRC)
 
-Sistema de tickets de TI para los hoteles y oficinas del grupo. Leé `PROGRESS.md` (estado y pendientes)
-y `README.md` (estructura). Producción: https://tickets.thecostaricacollection.com
+Sistema de tickets de TI para los hoteles y oficinas del grupo, en camino a **plataforma integral de gestión
+de TI**: el plan aprobado por etapas y las decisiones del Controller están en `docs/AUDITORIA_Y_PLAN.md`
+(leer antes de construir). Leé también `PROGRESS.md` (estado y pendientes) y `README.md` (estructura).
+Dos zonas: formulario público sencillo (no se toca) y backstage de IT (tema oscuro, menú lateral).
+Cada etapa: staging → pruebas → aprobación del Controller → producción. Producción: https://tickets.thecostaricacollection.com
 
 ## Dónde vive
 - **Repo:** `ITCRC1/hoteltickets` (rama `main`). Nunca en brodriguez7301-dot.
