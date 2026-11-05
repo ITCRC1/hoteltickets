@@ -20,6 +20,13 @@ Proyecto tomado por el Controller (fincontroller@seedcostarica.com) tras la sali
   externo, migraciones automáticas al arrancar, 31 tests. Formulario público sin cambios.
   Papelera se movió a la Etapa 3 (llega con el primer borrado: tickets).
 
+- 2026-11-05: **Etapa 2 en producción.** Incidente: caída ~6 min (502) porque `CSRF_TRUSTED_ORIGINS` de prod no
+  tenía `https://` y el nuevo `migrate` al arrancar corre los checks de Django. Se corrigió la variable; además
+  settings ahora agrega `https://` si falta. Respaldo previo: `.local/backup-prod-antes-etapa2-*.json`.
+  Lección: antes de pasar a `main`, comparar variables de prod vs staging y correr `manage.py check --deploy`
+  con los valores de prod. `pull_prod_db.py` falla si el código local tiene migraciones que prod aún no tiene
+  (usar el código de `main` para respaldar).
+
 ### Pendiente
 - [ ] Revisar `NOTIFICATION_EMAILS` en Railway: puede seguir avisando al responsable anterior.
 - [ ] Correo del usuario `admin` (it@thecostaricacollection.com): confirmar quién tiene ese buzón

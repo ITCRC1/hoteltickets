@@ -14,7 +14,10 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv(
 SITE_URL = config('SITE_URL', default='http://127.0.0.1:8000')
 
 # CSRF para producción detrás de HTTPS
-CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='', cast=Csv())
+# Django exige el esquema (https://); si la variable de Railway lo omite, se agrega aquí para que un error
+# de formato no impida arrancar (el 2026-11-05 tumbó producción al correr `migrate` en el arranque).
+CSRF_TRUSTED_ORIGINS = [o if '://' in o else f'https://{o}'
+                        for o in config('CSRF_TRUSTED_ORIGINS', default='', cast=Csv()) if o]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
