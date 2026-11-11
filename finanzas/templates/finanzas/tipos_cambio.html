@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Tipo de cambio {{ anio }}{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
+    <h1 class="h3 mb-0"><i class="bi bi-currency-exchange"></i> Tipo de cambio {{ anio }}</h1>
+    <form method="get"><select name="anio" class="form-select form-select-sm" onchange="this.form.submit()" aria-label="Año">{% for a in anios %}<option value="{{ a }}" {% if a == anio %}selected{% endif %}>{{ a }}</option>{% endfor %}</select></form>
+</div>
+<p class="text-muted mb-4">Un único tipo de cambio por mes (colones por dólar). Los gastos en otra moneda se convierten con el tipo de su mes;
+    sin tipo registrado no se suman y se avisa.</p>
+
+<div class="row g-3">
+    <div class="col-lg-7">
+        <div class="card"><div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead><tr><th>Mes</th><th class="text-end">₡ por $1</th><th>Registrado por</th><th>Nota</th></tr></thead>
+                <tbody>
+                {% for f in filas %}
+                    <tr>
+                        <td>{{ f.nombre }} {{ anio }}</td>
+                        <td class="text-end fw-semibold">{% if f.tc %}{{ f.tc.crc_por_usd }}{% elif f.falta %}<span class="badge bg-warning text-dark">Falta</span>{% else %}<span class="text-muted">—</span>{% endif %}</td>
+                        <td class="small">{% if f.tc %}{% if f.tc.registrado_por %}{{ f.tc.registrado_por.get_full_name|default:f.tc.registrado_por.username }}{% endif %} · {{ f.tc.actualizado_en|date:"d/m/Y" }}{% endif %}</td>
+                        <td class="small text-muted">{{ f.tc.observaciones|default:"" }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+                <tfoot><tr><td class="fw-bold">Promedio del año</td><td class="text-end fw-bold">{{ promedio|default:"—" }}</td><td colspan="2" class="small text-muted">Se usa para convertir presupuestos anuales</td></tr></tfoot>
+            </table>
+        </div></div>
+    </div>
+    <div class="col-lg-5">
+        {% if es_admin %}
+        <div class="card"><div class="card-body">
+            <h2 class="h6 text-uppercase text-muted">Registrar o corregir un mes</h2>
+            <form method="post">
+                {% csrf_token %}
+                {% if form.non_field_errors %}<div class="alert alert-danger small">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+                <div class="row g-2">
+                    <div class="col-4"><label class="form-label small" for="{{ form.anio.id_for_label }}">Año</label>{{ form.anio }}</div>
+                    <div class="col-3"><label class="form-label small" for="{{ form.mes.id_for_label }}">Mes</label>{{ form.mes }}</div>
+                    <div class="col-5"><label class="form-label small" for="{{ form.crc_por_usd.id_for_label }}">₡ por $1</label>{{ form.crc_por_usd }}{% for e in form.crc_por_usd.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</div>
+                    <div class="col-12"><label class="form-label small" for="{{ form.observaciones.id_for_label }}">Nota (fuente, p. ej. BCCR promedio)</label>{{ form.observaciones }}</div>
+                </div>
+                <button class="btn btn-primary mt-3"><i class="bi bi-save"></i> Guardar</button>
+                <p class="small text-muted mt-2 mb-0">Si el mes ya existe, se reemplaza (queda en la auditoría con el valor anterior).</p>
+            </form>
+        </div></div>
+        {% else %}
+        <div class="card"><div class="card-body small text-muted"><i class="bi bi-eye"></i> Solo el Administrador registra tipos de cambio.</div></div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

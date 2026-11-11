@@ -31,6 +31,11 @@
         <a class="nav-link {% if url == 'calendario' or url == 'calendario_vista' %}active{% endif %}" href="{% url 'calendario' %}"><i class="bi bi-calendar3"></i> Calendario</a>
         <div class="grupo">Activos</div>
         <a class="nav-link {% if url == 'activo_lista' or url == 'activo_crear' or url == 'activo_editar' %}active{% endif %}" href="{% url 'activo_lista' %}"><i class="bi bi-pc-display"></i> Inventario</a>
+        <div class="grupo">Finanzas</div>
+        <a class="nav-link {% if url == 'presupuesto_resumen' or url == 'presupuesto_crear' or url == 'presupuesto_editar' %}active{% endif %}" href="{% url 'presupuesto_resumen' %}"><i class="bi bi-wallet2"></i> Presupuestos</a>
+        <a class="nav-link {% if url == 'gasto_lista' or url == 'gasto_crear' or url == 'gasto_editar' %}active{% endif %}" href="{% url 'gasto_lista' %}"><i class="bi bi-receipt"></i> Gastos</a>
+        <a class="nav-link {% if url == 'suscripcion_lista' or url == 'suscripcion_crear' or url == 'suscripcion_editar' %}active{% endif %}" href="{% url 'suscripcion_lista' %}"><i class="bi bi-arrow-repeat"></i> Suscripciones</a>
+        <a class="nav-link {% if url == 'tipos_cambio' %}active{% endif %}" href="{% url 'tipos_cambio' %}"><i class="bi bi-currency-exchange"></i> Tipo de cambio</a>
         <div class="grupo">Reportes</div>
         <a class="nav-link {% if url == 'reportes' %}active{% endif %}" href="{% url 'reportes' %}"><i class="bi bi-file-earmark-spreadsheet"></i> Exportar a Excel</a>
         {% if puede_editar %}

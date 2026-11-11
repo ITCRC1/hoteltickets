@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load plataforma %}
+{% block title %}Suscripciones{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h3 mb-0"><i class="bi bi-arrow-repeat"></i> Suscripciones y servicios</h1>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'exportar_suscripciones' %}?{{ request.GET.urlencode }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-file-earmark-excel"></i> Exportar a Excel</a>
+        {% if es_admin %}<a href="{% url 'suscripcion_crear' %}" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg"></i> Nueva suscripción</a>{% endif %}
+    </div>
+</div>
+
+{% if sin_tipo %}<div class="alert alert-warning small"><i class="bi bi-exclamation-triangle"></i> {{ sin_tipo|length }} suscripci{{ sin_tipo|length|pluralize:"ón,ones" }} en otra moneda no se incluye{{ sin_tipo|length|pluralize:"n" }} en los totales: falta el tipo de cambio de este mes. <a href="{% url 'tipos_cambio' %}">Registrarlo</a>.</div>{% endif %}
+
+<div class="row g-3 mb-3">
+    <div class="col-6 col-lg"><div class="card h-100"><div class="card-body"><div class="kpi-label">Activas</div><div class="kpi-number">{{ kpi.activas }}</div></div></div></div>
+    <div class="col-6 col-lg"><div class="card h-100"><div class="card-body"><div class="kpi-label">Costo mensual</div><div class="fs-4 fw-bold">{{ simbolo }}{{ kpi.mensual|dinero }}</div></div></div></div>
+    <div class="col-6 col-lg"><div class="card h-100"><div class="card-body"><div class="kpi-label">Costo anual</div><div class="fs-4 fw-bold">{{ simbolo }}{{ kpi.anual|dinero }}</div></div></div></div>
+    <div class="col-6 col-lg"><a class="card kpi-card h-100 text-decoration-none" href="?renovacion=30"><div class="card-body"><div class="kpi-label">Renuevan en 30 días</div><div class="kpi-number {% if kpi.proximas_30 %}text-warning{% endif %}">{{ kpi.proximas_30 }}</div></div></a></div>
+    <div class="col-12 col-lg"><a class="card kpi-card h-100 text-decoration-none" href="?renovacion=vencida"><div class="card-body"><div class="kpi-label">Renovación vencida</div><div class="kpi-number {% if kpi.vencidas %}text-danger{% endif %}">{{ kpi.vencidas }}</div></div></a></div>
+</div>
+
+<div class="card mb-3"><div class="card-body">
+    <div class="d-flex justify-content-between"><h2 class="h6 text-uppercase text-muted">Proyección próximos 12 meses ({{ moneda }})</h2>
+        <span class="small"><strong>{{ simbolo }}{{ total_proyeccion|dinero }}</strong> · <a href="?moneda={% if moneda == 'USD' %}CRC{% else %}USD{% endif %}">ver en {% if moneda == 'USD' %}CRC{% else %}USD{% endif %}</a></span></div>
+    <div class="d-flex align-items-end gap-1" style="height: 140px">
+        {% for p in proyeccion %}
+        <div class="flex-grow-1 text-center" title="{{ p.mes|date:'F Y' }}: {{ simbolo }}{{ p.monto|dinero }}">
+            <div style="height: {{ p.pct }}px; max-height: 110px; background: var(--tc-gold); border-radius: 3px 3px 0 0; {% if not p.monto %}opacity: .15; height: 2px;{% endif %}"></div>
+            <div class="small text-muted text-capitalize">{{ p.mes|date:"M" }}</div>
+        </div>
+        {% endfor %}
+    </div>
+</div></div>
+
+<div class="card mb-3"><div class="card-body">
+    <form method="get" class="row g-2">
+        <div class="col-md-3"><input type="text" name="q" class="form-control" placeholder="Servicio, proveedor…" value="{{ filtros.q }}" aria-label="Buscar"></div>
+        <div class="col-md-2 col-6"><select name="estado" class="form-select" aria-label="Estado"><option value="">Todo estado</option>{% for v, l in estados %}<option value="{{ v }}" {% if filtros.estado == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+        <div class="col-md-2 col-6"><select name="proveedor" class="form-select" aria-label="Proveedor"><option value="">Todo proveedor</option>{% for p in proveedores %}<option value="{{ p }}" {% if filtros.proveedor == p %}selected{% endif %}>{{ p }}</option>{% endfor %}</select></div>
+        <div class="col-md-2 col-6"><select name="renovacion" class="form-select" aria-label="Renovación"><option value="">Cualquier fecha</option>
+            <option value="30" {% if filtros.renovacion == '30' %}selected{% endif %}>Renuevan en 30 días</option>
+            <option value="90" {% if filtros.renovacion == '90' %}selected{% endif %}>Renuevan en 90 días</option>
+            <option value="vencida" {% if filtros.renovacion == 'vencida' %}selected{% endif %}>Renovación vencida</option></select></div>
+        <div class="col-md-1 col-6"><button class="btn btn-primary w-100" aria-label="Filtrar"><i class="bi bi-search"></i></button></div>
+        <div class="col-md-2"><a href="{% url 'suscripcion_lista' %}" class="btn btn-outline-secondary w-100 {% if not hay_filtros %}disabled{% endif %}"><i class="bi bi-x-lg"></i> Limpiar</a></div>
+    </form>
+</div></div>
+
+<div class="card"><div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+        <thead><tr><th>Servicio</th><th>Categoría</th><th class="text-end">Costo</th><th>Frecuencia</th><th class="text-end">Mensual</th><th>Próxima renovación</th><th>Estado</th>{% if es_admin %}<th></th>{% endif %}</tr></thead>
+        <tbody>
+        {% for s in lista %}
+            <tr>
+                <td><a href="{% url 'suscripcion_editar' s.pk %}" class="fw-semibold text-decoration-none">{{ s.nombre }}</a>{% if s.proveedor %}<div class="small text-muted">{{ s.proveedor }}</div>{% endif %}</td>
+                <td class="small">{{ s.categoria }}</td>
+                <td class="text-end text-nowrap">{% if s.moneda == 'USD' %}${% else %}₡{% endif %}{{ s.costo|dinero }} <small class="text-muted">{{ s.moneda }}</small></td>
+                <td class="small">{{ s.get_frecuencia_display }}</td>
+                <td class="text-end text-nowrap small">{{ s.costo_mensual|dinero }}</td>
+                <td class="small text-nowrap {% if s.estado == 'activa' and s.proxima_renovacion and s.proxima_renovacion < hoy %}text-danger fw-semibold{% endif %}">{{ s.proxima_renovacion|date:"d/m/Y"|default:"—" }}</td>
+                <td><span class="badge bg-{{ s.color_estado }}">{{ s.get_estado_display }}</span></td>
+                {% if es_admin %}<td class="text-end">{% if s.estado == 'activa' %}
+                    <form method="post" action="{% url 'suscripcion_pagar' s.pk %}" onsubmit="return confirm('¿Registrar el pago de {{ s.nombre|escapejs }} como gasto y pasar la renovación al siguiente período?');">{% csrf_token %}
+                        <button class="btn btn-sm btn-outline-primary text-nowrap" title="Registra el gasto y adelanta la próxima renovación"><i class="bi bi-cash-coin"></i> Registrar pago</button></form>
+                {% endif %}</td>{% endif %}
+            </tr>
+        {% empty %}
+            <tr><td colspan="8" class="text-center text-muted py-5">No hay suscripciones{% if hay_filtros %} con estos filtros{% endif %}.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div></div>
+{% endblock %}

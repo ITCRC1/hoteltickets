@@ -49,6 +49,15 @@ Proyecto tomado por el Controller (fincontroller@seedcostarica.com) tras la sali
   congelados, anchos legibles, formatos de fecha/número. Exporta inventario, tickets y tareas respetando los filtros de
   cada lista (botón "Exportar a Excel"), nunca lo de la papelera; queda en auditoría. 86 tests.
 
+- 2026-11-11: **Etapas 9 y 10 (finanzas) en staging**: app `finanzas`. Tipo de cambio: tabla mensual (uno por mes,
+  manual, auditado con antes→después). Presupuesto anual por categoría (10 sembradas, ampliables), gastos
+  (pendiente/pagado/anulado) con moneda original, asociación automática al presupuesto del año+categoría. Resumen anual
+  en USD o CRC: asignado, utilizado, pagado, pendiente, disponible, % ejecución, gasto por mes, proyección de cierre,
+  suscripciones comprometidas. Conversión explícita (gasto: tipo de su mes; presupuesto: promedio del año); lo que no
+  tiene tipo NO se suma y se avisa. Suscripciones: costo mensual/anual, renovaciones, proyección 12 meses, "Registrar
+  pago" (crea el gasto y adelanta la renovación). Solo Administrador registra/edita; todos consultan. Excel de
+  presupuesto, gastos y suscripciones. Orden cambiado: Etapa 8 (dashboard) va después, ya con todos los datos. 107 tests.
+
 ### Pendiente
 - [ ] Revisar `NOTIFICATION_EMAILS` en Railway: puede seguir avisando al responsable anterior.
 - [ ] Correo del usuario `admin` (it@thecostaricacollection.com): confirmar quién tiene ese buzón

@@ -105,7 +105,7 @@ class Exportaciones(TestCase):
 
     def test_pagina_de_reportes(self):
         r = self.client.get(reverse('reportes'))
-        self.assertEqual(r.context['conteos'], {'inventario': 1, 'tickets': 2, 'tareas': 1})
+        self.assertEqual(r.context['conteos'], {'inventario': 1, 'tickets': 2, 'tareas': 1, 'gastos': 0, 'suscripciones': 0})
 
     def test_lista_vacia_genera_excel_valido(self):
         ws = hoja(self.client.get(reverse('exportar_tickets'), {'q': 'no-existe-nada'}))
