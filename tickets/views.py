@@ -168,9 +168,8 @@ def _anotar_orden(qs):
     return qs.annotate(orden_prioridad=orden_prioridad, finalizado=finalizado)
 
 
-@roles.requiere_rol()
-def ticket_lista(request):
-    """Lista con búsqueda, filtros, orden, contador y paginación."""
+def filtrar(request):
+    """Búsqueda, filtros y orden de la lista. Lo reutiliza la exportación a Excel."""
     qs = _anotar_orden(Ticket.objects.select_related('hotel', 'categoria', 'asignado_a'))
     g = request.GET
     f = {k: g.get(k, '').strip() for k in ('q', 'estado', 'prioridad', 'hotel', 'categoria', 'asignado', 'orden')}
@@ -199,7 +198,14 @@ def ticket_lista(request):
 
     if f['orden'] not in ORDENES:
         f['orden'] = 'recientes'
-    qs = qs.order_by(*ORDENES[f['orden']][1])
+    return qs.order_by(*ORDENES[f['orden']][1]), f
+
+
+@roles.requiere_rol()
+def ticket_lista(request):
+    """Lista con búsqueda, filtros, orden, contador y paginación."""
+    qs, f = filtrar(request)
+    g = request.GET
     pagina = Paginator(qs, POR_PAGINA).get_page(g.get('page'))
 
     sin_pagina = g.copy()

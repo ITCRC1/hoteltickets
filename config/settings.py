@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'tickets',
     'tareas',
     'inventario',
+    'reportes',
 ]
 
 MIDDLEWARE = [

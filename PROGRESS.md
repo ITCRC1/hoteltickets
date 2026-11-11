@@ -44,6 +44,11 @@ Proyecto tomado por el Controller (fincontroller@seedcostarica.com) tras la sali
   (también contra la papelera), garantía con aviso a 90 días, estadísticas (estado, categoría, ubicación, garantías),
   búsqueda/filtros/6 órdenes/paginación, papelera y auditoría. 78 tests.
 
+- 2026-11-11: **Etapa 7 (reportes Excel) en staging**: app `reportes` con generador único (`reportes/excel.py`,
+  openpyxl): encabezado con tipo de reporte, fecha, usuario y filtros; encabezados de color, filtros de Excel, paneles
+  congelados, anchos legibles, formatos de fecha/número. Exporta inventario, tickets y tareas respetando los filtros de
+  cada lista (botón "Exportar a Excel"), nunca lo de la papelera; queda en auditoría. 86 tests.
+
 ### Pendiente
 - [ ] Revisar `NOTIFICATION_EMAILS` en Railway: puede seguir avisando al responsable anterior.
 - [ ] Correo del usuario `admin` (it@thecostaricacollection.com): confirmar quién tiene ese buzón

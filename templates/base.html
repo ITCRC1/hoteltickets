@@ -31,6 +31,8 @@
         <a class="nav-link {% if url == 'calendario' or url == 'calendario_vista' %}active{% endif %}" href="{% url 'calendario' %}"><i class="bi bi-calendar3"></i> Calendario</a>
         <div class="grupo">Activos</div>
         <a class="nav-link {% if url == 'activo_lista' or url == 'activo_crear' or url == 'activo_editar' %}active{% endif %}" href="{% url 'activo_lista' %}"><i class="bi bi-pc-display"></i> Inventario</a>
+        <div class="grupo">Reportes</div>
+        <a class="nav-link {% if url == 'reportes' %}active{% endif %}" href="{% url 'reportes' %}"><i class="bi bi-file-earmark-spreadsheet"></i> Exportar a Excel</a>
         {% if puede_editar %}
         <div class="grupo">Administración</div>
         {% if es_admin %}

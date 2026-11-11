@@ -42,8 +42,8 @@ def _legible(t, campo):
     return getattr(t, campo) or ''
 
 
-@roles.requiere_rol()
-def tarea_lista(request):
+def filtrar(request):
+    """Búsqueda, filtros y orden de la lista. Lo reutiliza la exportación a Excel."""
     hoy = timezone.localdate()
     qs = Tarea.objects.select_related('responsable').annotate(
         orden_prioridad=Case(*[When(prioridad=k, then=Value(v)) for k, v in Tarea.PRIORIDAD_ORDEN.items()],
@@ -75,6 +75,14 @@ def tarea_lista(request):
         f['orden'] = 'vencimiento'
     if ORDENES[f['orden']][1]:
         qs = qs.order_by(*ORDENES[f['orden']][1])
+    return qs, f
+
+
+@roles.requiere_rol()
+def tarea_lista(request):
+    hoy = timezone.localdate()
+    qs, f = filtrar(request)
+    g = request.GET
     pagina = Paginator(qs, 25).get_page(g.get('page'))
     sin_pagina = g.copy()
     sin_pagina.pop('page', None)

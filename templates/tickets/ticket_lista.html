@@ -5,7 +5,10 @@
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
     <h1 class="h3 mb-0"><i class="bi bi-ticket-perforated"></i> Tickets</h1>
-    {% if puede_editar %}<a href="{% url 'papelera' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-trash3"></i> Papelera</a>{% endif %}
+    <div class="d-flex gap-2">
+        <a href="{% url 'exportar_tickets' %}?{{ query_sin_pagina }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-file-earmark-excel"></i> Exportar a Excel</a>
+        {% if puede_editar %}<a href="{% url 'papelera' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-trash3"></i> Papelera</a>{% endif %}
+    </div>
 </div>
 
 <!-- Filtros -->
