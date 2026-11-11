@@ -168,6 +168,57 @@ def usuario_invitar(request, pk):
     return redirect('usuarios')
 
 
+# ------------------ papelera (todos los módulos) ------------------
+
+@roles.requiere_rol(roles.ADMIN, roles.IT)
+def papelera(request):
+    from . import papelera as registro
+    grupos = []
+    for clave_modelo, info in registro.REGISTRO.items():
+        items = info['modelo'].todos.filter(eliminado_en__isnull=False).select_related('eliminado_por').order_by('-eliminado_en')
+        grupos.append({'clave': clave_modelo, 'etiqueta': info['etiqueta'], 'url_detalle': info['url_detalle'], 'items': items})
+    return render(request, 'core/papelera.html', {'grupos': grupos})
+
+
+def _de_papelera(clave_modelo, pk):
+    from . import papelera as registro
+    info = registro.modulo(clave_modelo)
+    if info is None:
+        return None, None
+    return info, get_object_or_404(info['modelo'].todos, pk=pk, eliminado_en__isnull=False)
+
+
+@require_POST
+@roles.requiere_rol(roles.ADMIN, roles.IT)
+def papelera_restaurar(request, clave_modelo, pk):
+    info, obj = _de_papelera(clave_modelo, pk)
+    if obj is None:
+        messages.error(request, 'Módulo desconocido.')
+        return redirect('papelera')
+    obj.restaurar()
+    if hasattr(obj, 'registrar_en_historial'):
+        obj.registrar_en_historial('restaurar', request.user, 'Restaurado desde la papelera')
+    auditar(request, 'RESTAURADO', info['etiqueta'].lower(), objeto=obj)
+    messages.success(request, f'"{obj}" se restauró.')
+    return redirect('papelera')
+
+
+@require_POST
+@roles.requiere_rol(roles.ADMIN)
+def papelera_purgar(request, clave_modelo, pk):
+    """Borrado definitivo: solo Administrador y solo desde la papelera. Queda en la auditoría general."""
+    info, obj = _de_papelera(clave_modelo, pk)
+    if obj is None:
+        messages.error(request, 'Módulo desconocido.')
+        return redirect('papelera')
+    resumen = obj.resumen_para_auditoria() if hasattr(obj, 'resumen_para_auditoria') else str(obj)
+    auditar(request, 'ELIMINADO_DEFINITIVO', info['etiqueta'].lower(), objeto=obj, detalle=resumen)
+    nombre = str(obj)
+    obj.delete()
+    messages.success(request, f'"{nombre}" se eliminó definitivamente.')
+    return redirect('papelera')
+
+
 # ------------------ auditoría general (solo Administrador) ------------------
 
 @roles.requiere_rol(roles.ADMIN)

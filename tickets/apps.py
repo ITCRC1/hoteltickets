@@ -5,3 +5,8 @@ class TicketsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'tickets'
     verbose_name = 'Tickets'
+
+    def ready(self):
+        from core import papelera
+        from .models import Ticket
+        papelera.registrar(Ticket, etiqueta='Tickets', url_detalle='ticket_detalle')

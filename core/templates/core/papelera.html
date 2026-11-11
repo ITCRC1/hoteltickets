@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Papelera{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-1"><i class="bi bi-trash3"></i> Papelera</h1>
+<p class="text-muted mb-4">Lo eliminado queda aquí y se puede restaurar.
+    {% if es_admin %}El borrado definitivo no se puede deshacer y queda en la auditoría.{% else %}El borrado definitivo lo hace un Administrador.{% endif %}</p>
+
+{% for g in grupos %}
+<div class="card mb-3">
+    <div class="card-body pb-0"><h2 class="h6 text-uppercase text-muted">{{ g.etiqueta }} <span class="badge badge-soft">{{ g.items|length }}</span></h2></div>
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead><tr><th>Registro</th><th>Eliminado</th><th>Por</th><th class="text-end">Acciones</th></tr></thead>
+            <tbody>
+            {% for o in g.items %}
+                <tr>
+                    <td>{% if g.url_detalle %}<a href="{% url g.url_detalle o.pk %}">{{ o }}</a>{% else %}{{ o }}{% endif %}</td>
+                    <td class="small text-nowrap">{{ o.eliminado_en|date:"d/m/Y H:i" }}</td>
+                    <td class="small">{{ o.eliminado_por.get_full_name|default:o.eliminado_por.username|default:"—" }}</td>
+                    <td class="text-end text-nowrap">
+                        <form method="post" action="{% url 'papelera_restaurar' g.clave o.pk %}" class="d-inline">{% csrf_token %}
+                            <button class="btn btn-sm btn-outline-primary"><i class="bi bi-arrow-counterclockwise"></i> Restaurar</button>
+                        </form>
+                        {% if es_admin %}
+                        <form method="post" action="{% url 'papelera_purgar' g.clave o.pk %}" class="d-inline"
+                              onsubmit="return confirm('¿Eliminar DEFINITIVAMENTE &quot;{{ o|escapejs }}&quot;? Se borra con todo su historial y no se puede deshacer.');">
+                            {% csrf_token %}
+                            <button class="btn btn-sm btn-outline-danger"><i class="bi bi-x-octagon"></i> Eliminar definitivo</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="4" class="text-center text-muted py-4">La papelera de {{ g.etiqueta|lower }} está vacía.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

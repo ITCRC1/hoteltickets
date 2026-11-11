@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Auditoria
+from .models import Auditoria, Directorio
 
 
 @admin.register(Auditoria)
@@ -19,3 +19,11 @@ class AuditoriaAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+@admin.register(Directorio)
+class DirectorioAdmin(admin.ModelAdmin):
+    """Correo de quien reporta → departamento (se usa al crear tickets desde el formulario público)."""
+    list_display = ('email', 'nombre', 'departamento', 'actualizado_en')
+    search_fields = ('email', 'nombre', 'departamento')
+    list_filter = ('departamento',)

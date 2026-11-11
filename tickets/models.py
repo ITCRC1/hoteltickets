@@ -11,6 +11,8 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from django.utils import timezone
 
+from core.models import EliminacionLogica
+
 
 class Hotel(models.Model):
     """Ubicación que requiere control de TI: un hotel o un punto estratégico fuera del hotel
@@ -58,8 +60,8 @@ class Categoria(models.Model):
         return self.nombre
 
 
-class Ticket(models.Model):
-    """Una incidencia o solicitud reportada."""
+class Ticket(EliminacionLogica):
+    """Una incidencia o solicitud reportada. Va a la papelera al eliminarse (ver core.EliminacionLogica)."""
 
     ESTADO_CHOICES = [
         ('abierto', 'Abierto'),
@@ -75,6 +77,17 @@ class Ticket(models.Model):
         'resuelto': 'success',
         'cerrado': 'secondary',
     }
+    ESTADOS_ABIERTOS = ('abierto', 'en_progreso', 'en_espera')
+
+    # Prioridad: solo interna (el formulario público no la pide; IT la define al atender).
+    PRIORIDAD_CHOICES = [
+        ('baja', 'Baja'),
+        ('normal', 'Normal'),
+        ('alta', 'Alta'),
+        ('urgente', 'Urgente'),
+    ]
+    PRIORIDAD_COLORES = {'baja': 'secondary', 'normal': 'info', 'alta': 'warning', 'urgente': 'danger'}
+    PRIORIDAD_ORDEN = {'urgente': 0, 'alta': 1, 'normal': 2, 'baja': 3}
 
     # Información básica
     titulo = models.CharField(max_length=200)
@@ -88,6 +101,9 @@ class Ticket(models.Model):
 
     # Clasificación
     estado = models.CharField(max_length=15, choices=ESTADO_CHOICES, default='abierto', db_index=True)
+    prioridad = models.CharField(max_length=10, choices=PRIORIDAD_CHOICES, default='normal', db_index=True)
+    notas_resolucion = models.TextField('Notas de resolución', blank=True,
+                                        help_text='Qué se hizo para resolverlo (diagnóstico, solución, repuestos)')
 
     # Personas
     solicitante_nombre = models.CharField(
@@ -98,6 +114,8 @@ class Ticket(models.Model):
         help_text='Correo del solicitante para notificaciones',
         default='',
     )
+    departamento = models.CharField(max_length=100, blank=True,
+                                    help_text='Se deriva del correo del solicitante (Directorio); IT puede ajustarlo')
     asignado_a = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True,
         related_name='tickets_asignados'
@@ -143,6 +161,25 @@ class Ticket(models.Model):
             return self.resuelto_en - self.creado_en
         return None
 
+    @property
+    def color_prioridad(self):
+        return self.PRIORIDAD_COLORES.get(self.prioridad, 'secondary')
+
+    def save(self, *args, **kwargs):
+        # Al crearse, el departamento se deriva del correo de quien reporta (el formulario no lo pregunta).
+        if self._state.adding and not self.departamento and self.solicitante_email:
+            from core.models import Directorio
+            self.departamento = Directorio.departamento_de(self.solicitante_email)
+        super().save(*args, **kwargs)
+
+    # Ganchos que usa la papelera genérica (core.views)
+    def registrar_en_historial(self, accion, usuario, detalle=''):
+        RegistroAuditoria.registrar(ticket=self, accion=accion, usuario=usuario, detalle=detalle)
+
+    def resumen_para_auditoria(self):
+        return (f'#{self.pk} {self.titulo} · {self.hotel} · solicitante {self.solicitante_nombre} '
+                f'<{self.solicitante_email}> · estado {self.get_estado_display()} · creado {self.creado_en:%d/%m/%Y}')
+
 
 class Comentario(models.Model):
     """Mensajes y actualizaciones en un ticket."""
@@ -176,6 +213,13 @@ class RegistroAuditoria(models.Model):
         ('resolver', 'Resuelto'),
         ('cerrar', 'Cerrado'),
         ('reabrir', 'Reabierto'),
+        ('cambio_prioridad', 'Cambio de prioridad'),
+        ('cambio_categoria', 'Cambio de categoría'),
+        ('cambio_departamento', 'Cambio de departamento'),
+        ('notas_resolucion', 'Notas de resolución'),
+        ('nota', 'Nota manual'),
+        ('eliminar', 'Enviado a la papelera'),
+        ('restaurar', 'Restaurado'),
     ]
 
     ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name='auditoria')
@@ -186,6 +230,9 @@ class RegistroAuditoria(models.Model):
     )
     accion = models.CharField(max_length=20, choices=ACCION_CHOICES)
     detalle = models.TextField(blank=True)
+    # Para cambios de campo: valor anterior → valor nuevo (texto legible).
+    valor_anterior = models.CharField(max_length=255, blank=True)
+    valor_nuevo = models.CharField(max_length=255, blank=True)
     creado_en = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -197,12 +244,14 @@ class RegistroAuditoria(models.Model):
         return f'{self.get_accion_display()} · {self.ticket} · {self.creado_en:%d/%m/%Y %H:%M}'
 
     @classmethod
-    def registrar(cls, ticket, accion, usuario=None, detalle=''):
-        """Helper para crear entradas de auditoría desde las vistas."""
+    def registrar(cls, ticket, accion, usuario=None, detalle='', anterior=None, nuevo=None):
+        """Helper para crear entradas del historial desde las vistas (anterior/nuevo para cambios de campo)."""
         return cls.objects.create(
             ticket=ticket,
             usuario=usuario,
-            usuario_nombre=usuario.get_full_name() or usuario.username if usuario else 'Sistema',
+            usuario_nombre=(usuario.get_full_name() or usuario.username) if usuario else 'Sistema',
             accion=accion,
             detalle=detalle,
+            valor_anterior=str(anterior or '')[:255],
+            valor_nuevo=str(nuevo or '')[:255],
         )

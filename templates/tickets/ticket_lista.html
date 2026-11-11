@@ -3,45 +3,66 @@
 {% block title %}Tickets{% endblock %}
 
 {% block content %}
-<h2 class="mb-4"><i class="bi bi-list-ul"></i> Tickets</h2>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h3 mb-0"><i class="bi bi-ticket-perforated"></i> Tickets</h1>
+    {% if puede_editar %}<a href="{% url 'papelera' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-trash3"></i> Papelera</a>{% endif %}
+</div>
 
 <!-- Filtros -->
 <div class="card mb-3">
     <div class="card-body">
         <form method="get" class="row g-2">
-            <div class="col-md-3">
-                <input type="text" name="q" class="form-control" placeholder="Buscar..." value="{{ filtros.q }}">
+            <div class="col-lg-3 col-md-6">
+                <input type="text" name="q" class="form-control" placeholder="Buscar #, título, solicitante, correo…" value="{{ filtros.q }}" aria-label="Buscar">
             </div>
-            <div class="col-md-2">
-                <select name="estado" class="form-select">
-                    <option value="">Estado</option>
-                    {% for v, l in estados %}
-                    <option value="{{ v }}" {% if filtros.estado == v %}selected{% endif %}>{{ l }}</option>
-                    {% endfor %}
+            <div class="col-lg-2 col-md-3 col-6">
+                <select name="estado" class="form-select" aria-label="Estado">
+                    <option value="">Todos los estados</option>
+                    <option value="abiertos" {% if filtros.estado == 'abiertos' %}selected{% endif %}>Solo pendientes</option>
+                    {% for v, l in estados %}<option value="{{ v }}" {% if filtros.estado == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
                 </select>
             </div>
-            <div class="col-md-2">
-                <select name="hotel" class="form-select">
-                    <option value="">Hotel</option>
-                    {% for h in hoteles %}
-                    <option value="{{ h.id }}" {% if filtros.hotel == h.id|stringformat:'s' %}selected{% endif %}>{{ h.nombre }}</option>
-                    {% endfor %}
+            <div class="col-lg-2 col-md-3 col-6">
+                <select name="prioridad" class="form-select" aria-label="Prioridad">
+                    <option value="">Toda prioridad</option>
+                    {% for v, l in prioridades %}<option value="{{ v }}" {% if filtros.prioridad == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
                 </select>
             </div>
-            <div class="col-md-2">
-                <select name="categoria" class="form-select">
-                    <option value="">Categoría</option>
-                    {% for c in categorias %}
-                    <option value="{{ c.id }}" {% if filtros.categoria == c.id|stringformat:'s' %}selected{% endif %}>{{ c.nombre }}</option>
-                    {% endfor %}
+            <div class="col-lg-2 col-md-4 col-6">
+                <select name="asignado" class="form-select" aria-label="Responsable">
+                    <option value="">Todo responsable</option>
+                    <option value="ninguno" {% if filtros.asignado == 'ninguno' %}selected{% endif %}>Sin asignar</option>
+                    {% for u in responsables %}<option value="{{ u.pk }}" {% if filtros.asignado == u.pk|stringformat:'s' %}selected{% endif %}>{{ u.get_full_name|default:u.username }}</option>{% endfor %}
                 </select>
             </div>
-            <div class="col-md-1">
-                <button class="btn btn-primary w-100"><i class="bi bi-search"></i></button>
+            <div class="col-lg-3 col-md-4 col-6">
+                <select name="hotel" class="form-select" aria-label="Ubicación">
+                    <option value="">Toda ubicación</option>
+                    {% for h in hoteles %}<option value="{{ h.id }}" {% if filtros.hotel == h.id|stringformat:'s' %}selected{% endif %}>{{ h.nombre }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-lg-3 col-md-4 col-6">
+                <select name="categoria" class="form-select" aria-label="Categoría">
+                    <option value="">Toda categoría</option>
+                    {% for c in categorias %}<option value="{{ c.id }}" {% if filtros.categoria == c.id|stringformat:'s' %}selected{% endif %}>{{ c.nombre }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <select name="orden" class="form-select" aria-label="Ordenar por">
+                    {% for v, l in ordenes %}<option value="{{ v }}" {% if filtros.orden == v %}selected{% endif %}>Orden: {{ l }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-lg-2 col-6">
+                <button class="btn btn-primary w-100"><i class="bi bi-search"></i> Filtrar</button>
+            </div>
+            <div class="col-lg-2 col-6">
+                <a href="{% url 'ticket_lista' %}" class="btn btn-outline-secondary w-100 {% if not hay_filtros %}disabled{% endif %}"><i class="bi bi-x-lg"></i> Limpiar</a>
             </div>
         </form>
     </div>
 </div>
+
+<p class="small text-muted mb-2">{{ total }} ticket{{ total|pluralize }}{% if hay_filtros %} con estos filtros{% endif %}{% if pagina.paginator.num_pages > 1 %} · página {{ pagina.number }} de {{ pagina.paginator.num_pages }}{% endif %}</p>
 
 <!-- Tabla -->
 <div class="card">
@@ -49,24 +70,18 @@
         <table class="table table-tickets table-hover mb-0">
             <thead>
                 <tr>
-                    <th>#</th>
-                    <th>Título</th>
-                    <th>Hotel</th>
-                    <th>Categoría</th>
-                    <th>Estado</th>
-                    <th>Asignado a</th>
-                    <th>Creado</th>
+                    <th>#</th><th>Título</th><th>Ubicación</th><th>Prioridad</th><th>Estado</th><th>Responsable</th><th>Creado</th>
                 </tr>
             </thead>
             <tbody>
-                {% for t in tickets %}
+                {% for t in pagina %}
                 <tr style="cursor:pointer" onclick="window.location='{% url 'ticket_detalle' t.pk %}'">
-                    <td><strong>#{{ t.id }}</strong></td>
-                    <td>{{ t.titulo }}</td>
-                    <td>{{ t.hotel.nombre }}</td>
-                    <td><span class="badge" style="background:{{ t.categoria.color }}">{{ t.categoria.nombre }}</span></td>
+                    <td><a href="{% url 'ticket_detalle' t.pk %}" class="fw-bold text-decoration-none">#{{ t.id }}</a></td>
+                    <td>{{ t.titulo }}{% if t.departamento %}<div class="small text-muted">{{ t.departamento }}</div>{% endif %}</td>
+                    <td class="small">{{ t.hotel.nombre }}</td>
+                    <td><span class="badge bg-{{ t.color_prioridad }}">{{ t.get_prioridad_display }}</span></td>
                     <td><span class="badge bg-{{ t.color_estado }}">{{ t.get_estado_display }}</span></td>
-                    <td>{% if t.asignado_a %}{{ t.asignado_a.get_full_name|default:t.asignado_a.username }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
+                    <td class="small">{% if t.asignado_a %}{{ t.asignado_a.get_full_name|default:t.asignado_a.username }}{% else %}<span class="text-muted">Sin asignar</span>{% endif %}</td>
                     <td><small class="text-muted" title="{{ t.creado_en|date:'d/m/Y H:i' }}">{{ t.creado_en|naturaltime }}</small></td>
                 </tr>
                 {% empty %}
@@ -77,5 +92,19 @@
     </div>
 </div>
 
-<p class="text-muted small mt-2">Mostrando hasta 200 resultados. Usa los filtros para refinar.</p>
+{% if pagina.has_other_pages %}
+<nav class="mt-3" aria-label="Páginas">
+    <ul class="pagination pagination-sm">
+        {% if pagina.has_previous %}
+        <li class="page-item"><a class="page-link" href="?{{ query_sin_pagina }}{% if query_sin_pagina %}&{% endif %}page=1">« Primera</a></li>
+        <li class="page-item"><a class="page-link" href="?{{ query_sin_pagina }}{% if query_sin_pagina %}&{% endif %}page={{ pagina.previous_page_number }}">Anterior</a></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">{{ pagina.number }} / {{ pagina.paginator.num_pages }}</span></li>
+        {% if pagina.has_next %}
+        <li class="page-item"><a class="page-link" href="?{{ query_sin_pagina }}{% if query_sin_pagina %}&{% endif %}page={{ pagina.next_page_number }}">Siguiente</a></li>
+        <li class="page-item"><a class="page-link" href="?{{ query_sin_pagina }}{% if query_sin_pagina %}&{% endif %}page={{ pagina.paginator.num_pages }}">Última »</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
 {% endblock %}

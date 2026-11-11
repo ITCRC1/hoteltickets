@@ -78,7 +78,7 @@ class PermisosTickets(Base):
     def test_it_support_modifica(self):
         self.entrar(self.it)
         r = self.client.post(reverse('ticket_detalle', args=[self.ticket.pk]),
-                             {'accion': 'gestion', 'estado': 'en_progreso', 'categoria': self.cat.pk,
+                             {'accion': 'gestion', 'estado': 'en_progreso', 'prioridad': 'normal', 'categoria': self.cat.pk,
                               'asignado_a': self.it.pk})
         self.assertEqual(r.status_code, 302)
         self.ticket.refresh_from_db()

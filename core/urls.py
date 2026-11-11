@@ -10,4 +10,7 @@ urlpatterns = [
     path('usuarios/<int:pk>/editar/', views.usuario_editar, name='usuario_editar'),
     path('usuarios/<int:pk>/invitar/', views.usuario_invitar, name='usuario_invitar'),
     path('auditoria/', views.auditoria, name='auditoria'),
+    path('papelera/', views.papelera, name='papelera'),
+    path('papelera/<str:clave_modelo>/<int:pk>/restaurar/', views.papelera_restaurar, name='papelera_restaurar'),
+    path('papelera/<str:clave_modelo>/<int:pk>/eliminar/', views.papelera_purgar, name='papelera_purgar'),
 ]

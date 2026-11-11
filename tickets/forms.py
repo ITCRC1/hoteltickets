@@ -55,11 +55,15 @@ class TicketGestionForm(forms.ModelForm):
 
     class Meta:
         model = Ticket
-        fields = ['estado', 'asignado_a', 'categoria']
+        fields = ['estado', 'prioridad', 'asignado_a', 'categoria', 'departamento', 'notas_resolucion']
         widgets = {
             'estado': forms.Select(attrs={'class': 'form-select'}),
+            'prioridad': forms.Select(attrs={'class': 'form-select'}),
             'asignado_a': forms.Select(attrs={'class': 'form-select'}),
             'categoria': forms.Select(attrs={'class': 'form-select'}),
+            'departamento': forms.TextInput(attrs={'class': 'form-control'}),
+            'notas_resolucion': forms.Textarea(attrs={'class': 'form-control', 'rows': 4,
+                                                      'placeholder': 'Diagnóstico, solución aplicada, repuestos…'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -75,6 +79,7 @@ class TicketGestionForm(forms.ModelForm):
             atienden = User.objects.filter(Q(pk__in=atienden.values('pk')) | Q(pk=actual))
         self.fields['asignado_a'].queryset = atienden.order_by('first_name', 'username')
         self.fields['asignado_a'].label_from_instance = lambda u: u.get_full_name() or u.username
+        self.fields['asignado_a'].empty_label = 'Sin asignar'
 
 
 class ComentarioForm(forms.ModelForm):

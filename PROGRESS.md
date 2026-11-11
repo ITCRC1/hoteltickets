@@ -27,11 +27,16 @@ Proyecto tomado por el Controller (fincontroller@seedcostarica.com) tras la sali
   con los valores de prod. `pull_prod_db.py` falla si el código local tiene migraciones que prod aún no tiene
   (usar el código de `main` para respaldar).
 
+- 2026-11-11: **Etapa 3 (tickets) en staging**: prioridad interna (Baja/Normal/Alta/Urgente), notas de resolución,
+  departamento derivado del Directorio (correo → depto) o del perfil, historial con valor anterior → nuevo por campo
+  (sin registros si no hubo cambios) + notas manuales, filtros por prioridad/responsable/pendientes, 6 órdenes,
+  contador, limpiar filtros, paginación de 25, papelera genérica (`core/papelera.py`, la usarán los demás módulos):
+  enviar a papelera Admin/IT, restaurar Admin/IT, borrado definitivo solo Admin con constancia en auditoría. 55 tests.
+
 ### Pendiente
 - [ ] Revisar `NOTIFICATION_EMAILS` en Railway: puede seguir avisando al responsable anterior.
 - [ ] Correo del usuario `admin` (it@thecostaricacollection.com): confirmar quién tiene ese buzón
       (recuperación de contraseña).
-- [ ] Papelera, prioridad y mejoras de tickets → Etapa 3.
 
 ### Datos de producción (26-oct)
 15 tickets · 7 ubicaciones (4 hoteles + oficinas Drake, Sierpe, Uvita) · 2 usuarios.
