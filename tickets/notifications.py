@@ -14,6 +14,8 @@ from django.urls import reverse
 import requests
 import json
 
+from core.models import destinatarios_avisos
+
 logger = logging.getLogger(__name__)
 
 
@@ -77,7 +79,7 @@ def notificar_ticket_creado(ticket):
     contexto = {'ticket': ticket, 'url': _construir_url(ticket)}
 
     # 1) Alerta a técnicos / admins
-    admins = getattr(settings, 'NOTIFICATION_EMAILS', [])
+    admins = destinatarios_avisos()
     # fincontroller_email = 'fincontroller@seedcostarica.com'
     # isaac_email = 'isaac@thecostaricacollection.com'
     if admins:
@@ -109,7 +111,7 @@ def notificar_comentario(comentario):
     Los comentarios públicos notifican a técnicos/admins y al solicitante.
     """
     ticket = comentario.ticket
-    admins = getattr(settings, 'NOTIFICATION_EMAILS', [])
+    admins = destinatarios_avisos()
     destinatarios = [email for email in admins if email]
 
     if not comentario.interno and ticket.solicitante_email:

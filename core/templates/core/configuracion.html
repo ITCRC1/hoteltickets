@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}Configuración{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-1"><i class="bi bi-sliders"></i> Configuración</h1>
+<p class="text-muted mb-4">Catálogos, parámetros y seguridad de la plataforma. Todo cambio queda en la <a href="{% url 'auditoria' %}?modulo=configuracion">auditoría</a>.</p>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-7">
+        <div class="card h-100"><div class="card-body">
+            <h2 class="h6 text-uppercase text-muted">Avisos por correo</h2>
+            <form method="post">
+                {% csrf_token %}
+                <label class="form-label small fw-semibold" for="{{ form.destinatarios_avisos.id_for_label }}">{{ form.destinatarios_avisos.label }}</label>
+                {{ form.destinatarios_avisos }}
+                <div class="form-text">{{ form.destinatarios_avisos.help_text }}{% if desde_railway %} Hoy se toman de la variable <code>NOTIFICATION_EMAILS</code> de Railway; al guardar aquí, manda esta lista.{% endif %}</div>
+                {% for e in form.destinatarios_avisos.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                <button class="btn btn-primary btn-sm mt-2"><i class="bi bi-save"></i> Guardar</button>
+            </form>
+        </div></div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card h-100"><div class="card-body small">
+            <h2 class="h6 text-uppercase text-muted">Sistema</h2>
+            <table class="table table-sm mb-0">
+                <tr><td>Ambiente</td><td class="text-end">{{ sistema.ambiente }}</td></tr>
+                <tr><td>Versión</td><td class="text-end"><code>{{ sistema.version }}</code></td></tr>
+                <tr><td>Usuarios activos</td><td class="text-end"><a href="{% url 'usuarios' %}">{{ sistema.usuarios_activos }}</a></td></tr>
+                <tr><td>Envío de correos</td><td class="text-end">{% if sistema.correo_activo %}<span class="badge bg-success">Activo</span>{% else %}<span class="badge bg-secondary">Apagado (solo consola)</span>{% endif %}</td></tr>
+                <tr><td>Asistente de IA (Claude)</td><td class="text-end">{% if sistema.ia_configurada %}<span class="badge bg-success">Configurado</span>{% else %}<span class="badge bg-secondary">Sin clave de API</span>{% endif %}</td></tr>
+            </table>
+        </div></div>
+    </div>
+</div>
+
+<h2 class="h5 mb-3">Catálogos</h2>
+<div class="row g-3 mb-4">
+    {% for clave, info, n in catalogos %}
+    <div class="col-md-6 col-xl-4">
+        <a href="{% url 'catalogo' clave %}" class="card kpi-card h-100 text-decoration-none"><div class="card-body">
+            <div class="d-flex justify-content-between"><h3 class="h6 mb-1"><i class="bi bi-{{ info.icono }}"></i> {{ info.titulo }}</h3><span class="badge badge-soft">{{ n }}</span></div>
+            <p class="small text-muted mb-0">{{ info.texto }}</p>
+        </div></a>
+    </div>
+    {% endfor %}
+    <div class="col-md-6 col-xl-4">
+        <a href="{% url 'tipos_cambio' %}" class="card kpi-card h-100 text-decoration-none"><div class="card-body">
+            <h3 class="h6 mb-1"><i class="bi bi-currency-exchange"></i> Monedas y tipo de cambio</h3>
+            <p class="small text-muted mb-0">CRC y USD. Un tipo de cambio por mes (tabla de validación).</p>
+        </div></a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="card"><div class="card-body pb-0"><h2 class="h6 text-uppercase text-muted">Roles y permisos</h2>
+            <p class="small text-muted">Se verifican en el servidor en cada acción. El rol de cada persona se asigna en <a href="{% url 'usuarios' %}">Usuarios</a>.</p></div>
+            <div class="table-responsive"><table class="table table-sm align-middle mb-0">
+                <thead><tr><th>Permiso</th><th class="text-center">Administrador</th><th class="text-center">IT Support</th><th class="text-center">Solo lectura</th></tr></thead>
+                <tbody>
+                {% for permiso, a, i, l in matriz %}
+                    <tr><td class="small">{{ permiso }}</td>
+                        <td class="text-center">{% if a %}<i class="bi bi-check-lg text-success" aria-label="Sí"></i>{% else %}<i class="bi bi-dash text-muted" aria-label="No"></i>{% endif %}</td>
+                        <td class="text-center">{% if i %}<i class="bi bi-check-lg text-success" aria-label="Sí"></i>{% else %}<i class="bi bi-dash text-muted" aria-label="No"></i>{% endif %}</td>
+                        <td class="text-center">{% if l %}<i class="bi bi-check-lg text-success" aria-label="Sí"></i>{% else %}<i class="bi bi-dash text-muted" aria-label="No"></i>{% endif %}</td></tr>
+                {% endfor %}
+                </tbody>
+            </table></div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card h-100"><div class="card-body small">
+            <h2 class="h6 text-uppercase text-muted">Seguridad</h2>
+            <ul class="mb-0 ps-3">
+                <li>Sesión: se cierra tras <strong>{{ sistema.sesion_minutos }} minutos</strong> sin actividad (variable <code>SESSION_IDLE_MINUTES</code>).</li>
+                <li>Contraseñas: mínimo 10 caracteres, letras y números, distinta del correo; guardadas con hash (PBKDF2).</li>
+                <li>Alta de usuarios por link de invitación de un solo uso, válido {{ sistema.invitacion_dias }} días.</li>
+                <li>Intentos de ingreso fallidos, cambios de usuarios y de configuración quedan en la auditoría.</li>
+                <li>Las claves de servicios (correo, IA) viven en variables de Railway, nunca en el código.</li>
+            </ul>
+        </div></div>
+    </div>
+</div>
+{% endblock %}

@@ -43,6 +43,7 @@
         {% if es_admin %}
         <a class="nav-link {% if url == 'usuarios' %}active{% endif %}" href="{% url 'usuarios' %}"><i class="bi bi-people"></i> Usuarios</a>
         <a class="nav-link {% if url == 'auditoria' %}active{% endif %}" href="{% url 'auditoria' %}"><i class="bi bi-shield-check"></i> Auditoría</a>
+        <a class="nav-link {% if url == 'configuracion' or url == 'catalogo' or url == 'catalogo_editar' %}active{% endif %}" href="{% url 'configuracion' %}"><i class="bi bi-sliders"></i> Configuración</a>
         {% endif %}
         <a class="nav-link {% if url == 'papelera' %}active{% endif %}" href="{% url 'papelera' %}"><i class="bi bi-trash3"></i> Papelera</a>
         {% if es_admin %}

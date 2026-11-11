@@ -63,8 +63,15 @@ Proyecto tomado por el Controller (fincontroller@seedcostarica.com) tras la sali
   año en USD (asignado/utilizado/disponible con barra y aviso de montos sin tipo de cambio), equipos, suscripciones por
   vencer, actividades próximas 7 días, renovaciones 30 días y accesos directos según el rol. 109 tests.
 
+- 2026-11-11: **Etapa 12 (configuración) en staging**: pantalla Configuración (solo Admin) con destinatarios de avisos
+  editables en la app (`core.Parametro`; mientras no se guarde ahí, sigue mandando la variable NOTIFICATION_EMAILS de
+  Railway), catálogos editables (ubicaciones, categorías de tickets con color, categorías y estados de inventario,
+  categorías de gasto: se desactivan, no se borran), Directorio correo → departamento (sí se borra), estado del sistema,
+  matriz de roles y permisos, seguridad. Todo auditado. 118 tests.
+
 ### Pendiente
-- [ ] Revisar `NOTIFICATION_EMAILS` en Railway: puede seguir avisando al responsable anterior.
+- [ ] Avisos: hoy van solo a it@thecostaricacollection.com (buzón del ex responsable). Al pasar la Etapa 12 a prod,
+      el Controller los cambia en Configuración.
 - [ ] Correo del usuario `admin` (it@thecostaricacollection.com): confirmar quién tiene ese buzón
       (recuperación de contraseña).
 

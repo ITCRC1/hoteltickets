@@ -116,3 +116,36 @@ class Auditoria(models.Model):
 
     def __str__(self):
         return f'{self.creado_en:%d/%m/%Y %H:%M} · {self.usuario_nombre} · {self.accion} · {self.objeto}'
+
+
+class Parametro(models.Model):
+    """Parámetros generales editables desde Configuración (clave → valor)."""
+    clave = models.CharField(max_length=60, unique=True)
+    valor = models.TextField(blank=True)
+    actualizado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
+    actualizado_en = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Parámetro'
+        verbose_name_plural = 'Parámetros'
+
+    def __str__(self):
+        return self.clave
+
+    @staticmethod
+    def obtener(clave, por_defecto=''):
+        fila = Parametro.objects.filter(clave=clave).first()
+        return fila.valor if fila is not None else por_defecto
+
+
+def destinatarios_avisos():
+    """Correos que reciben los avisos de tickets nuevos y comentarios.
+
+    Se configuran en Configuración; mientras no se hayan configurado ahí, se usa la variable NOTIFICATION_EMAILS
+    de Railway (comportamiento anterior).
+    """
+    from django.conf import settings
+    fila = Parametro.objects.filter(clave='destinatarios_avisos').first()
+    if fila is None:
+        return list(getattr(settings, 'NOTIFICATION_EMAILS', []))
+    return [c.strip() for c in fila.valor.replace(';', ',').split(',') if c.strip()]

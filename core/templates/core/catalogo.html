@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}{{ info.titulo }}{% endblock %}
+
+{% block content %}
+<a href="{% url 'configuracion' %}" class="text-decoration-none small">&larr; Configuración</a>
+<h1 class="h3 mt-1 mb-1"><i class="bi bi-{{ info.icono }}"></i> {{ info.titulo }}</h1>
+<p class="text-muted mb-4">{{ info.texto }}{% if not info.borrable %} Lo que ya está en uso no se borra: se desactiva y deja de aparecer en las listas para elegir.{% endif %}</p>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="card"><div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead><tr>{% for e in encabezados %}<th class="text-capitalize">{{ e }}</th>{% endfor %}<th></th></tr></thead>
+                <tbody>
+                {% for f in filas %}
+                    <tr class="{% if f.obj == obj %}table-active{% endif %}">
+                        {% for v in f.valores %}<td class="small">{% if v|slice:":1" == "#" and v|length == 7 %}<span class="d-inline-block rounded me-1" style="width: 14px; height: 14px; background: {{ v }}; vertical-align: middle"></span>{% endif %}{{ v|default:"—" }}</td>{% endfor %}
+                        <td class="text-end text-nowrap">
+                            <a href="{% url 'catalogo_editar' nombre f.obj.pk %}" class="btn btn-sm btn-outline-primary" aria-label="Editar {{ f.obj }}"><i class="bi bi-pencil"></i></a>
+                            {% if info.borrable %}
+                            <form method="post" action="{% url 'catalogo_borrar' nombre f.obj.pk %}" class="d-inline" onsubmit="return confirm('¿Eliminar {{ f.obj|escapejs }} del directorio?');">{% csrf_token %}
+                                <button class="btn btn-sm btn-outline-danger" aria-label="Eliminar {{ f.obj }}"><i class="bi bi-trash3"></i></button></form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="{{ encabezados|length|add:1 }}" class="text-center text-muted py-4">Todavía no hay registros.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div></div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card"><div class="card-body">
+            <h2 class="h6 text-uppercase text-muted">{% if obj %}Editar "{{ obj }}"{% else %}Agregar{% endif %}</h2>
+            <form method="post" action="{% if obj %}{% url 'catalogo_editar' nombre obj.pk %}{% else %}{% url 'catalogo' nombre %}{% endif %}" novalidate>
+                {% csrf_token %}
+                {% if form.non_field_errors %}<div class="alert alert-danger small">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+                {% for campo in form %}
+                <div class="mb-2 {% if campo.field.widget.input_type == 'checkbox' %}form-check{% endif %}">
+                    {% if campo.field.widget.input_type == 'checkbox' %}{{ campo }} <label class="form-check-label small" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+                    {% else %}<label class="form-label small fw-semibold" for="{{ campo.id_for_label }}">{{ campo.label }}{% if campo.field.required %} *{% endif %}</label>{{ campo }}{% endif %}
+                    {% for e in campo.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                </div>
+                {% endfor %}
+                <button class="btn btn-primary btn-sm"><i class="bi bi-save"></i> {% if obj %}Guardar cambios{% else %}Agregar{% endif %}</button>
+                {% if obj %}<a href="{% url 'catalogo' nombre %}" class="btn btn-sm btn-outline-secondary">Cancelar</a>{% endif %}
+            </form>
+        </div></div>
+    </div>
+</div>
+{% endblock %}
