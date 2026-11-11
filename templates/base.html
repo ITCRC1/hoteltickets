@@ -27,6 +27,8 @@
         <div class="grupo">Operación</div>
         <a class="nav-link {% if url == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}"><i class="bi bi-speedometer2"></i> Dashboard</a>
         <a class="nav-link {% if url == 'ticket_lista' or url == 'ticket_detalle' %}active{% endif %}" href="{% url 'ticket_lista' %}"><i class="bi bi-ticket-perforated"></i> Tickets</a>
+        <a class="nav-link {% if url == 'tarea_lista' or url == 'tarea_crear' or url == 'tarea_editar' %}active{% endif %}" href="{% url 'tarea_lista' %}"><i class="bi bi-check2-square"></i> Tareas</a>
+        <a class="nav-link {% if url == 'calendario' or url == 'calendario_vista' %}active{% endif %}" href="{% url 'calendario' %}"><i class="bi bi-calendar3"></i> Calendario</a>
         {% if puede_editar %}
         <div class="grupo">Administración</div>
         {% if es_admin %}

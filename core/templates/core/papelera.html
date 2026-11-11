@@ -17,7 +17,7 @@
                 <tr>
                     <td>{% if g.url_detalle %}<a href="{% url g.url_detalle o.pk %}">{{ o }}</a>{% else %}{{ o }}{% endif %}</td>
                     <td class="small text-nowrap">{{ o.eliminado_en|date:"d/m/Y H:i" }}</td>
-                    <td class="small">{{ o.eliminado_por.get_full_name|default:o.eliminado_por.username|default:"—" }}</td>
+                    <td class="small">{% if o.eliminado_por %}{{ o.eliminado_por.get_full_name|default:o.eliminado_por.username }}{% else %}—{% endif %}</td>
                     <td class="text-end text-nowrap">
                         <form method="post" action="{% url 'papelera_restaurar' g.clave o.pk %}" class="d-inline">{% csrf_token %}
                             <button class="btn btn-sm btn-outline-primary"><i class="bi bi-arrow-counterclockwise"></i> Restaurar</button>

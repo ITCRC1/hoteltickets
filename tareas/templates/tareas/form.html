@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}{% if tarea %}{{ tarea.titulo }}{% else %}Nueva tarea{% endif %}{% endblock %}
+
+{% block content %}
+{% url 'tarea_lista' as url_lista %}<a href="{{ volver|default:url_lista }}" class="text-decoration-none small">&larr; Volver</a>
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3 mt-1">
+    <h1 class="h3 mb-0">{% if tarea %}<i class="bi bi-check2-square"></i> {{ tarea.titulo }}{% else %}<i class="bi bi-plus-lg"></i> Nueva tarea{% endif %}</h1>
+    {% if tarea and editable %}
+    <form method="post" action="{% url 'tarea_eliminar' tarea.pk %}" onsubmit="return confirm('¿Enviar la tarea a la papelera? Se puede restaurar.');">
+        {% csrf_token %}<button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash3"></i> Eliminar</button>
+    </form>
+    {% endif %}
+</div>
+
+{% if tarea.en_papelera %}<div class="alert alert-warning"><i class="bi bi-trash3"></i> Esta tarea está en la papelera. Restáurala desde la <a href="{% url 'papelera' %}">Papelera</a> para editarla.</div>{% endif %}
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="card"><div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="volver" value="{{ volver }}">
+                {% if form.non_field_errors %}<div class="alert alert-danger small">{{ form.non_field_errors }}</div>{% endif %}
+                <div class="mb-3">
+                    <label class="form-label" for="{{ form.titulo.id_for_label }}">Título</label>
+                    {{ form.titulo }}{% for e in form.titulo.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="{{ form.descripcion.id_for_label }}">Descripción</label>
+                    {{ form.descripcion }}
+                </div>
+                <div class="row g-2">
+                    <div class="col-md-3 mb-3"><label class="form-label" for="{{ form.estado.id_for_label }}">Estado</label>{{ form.estado }}</div>
+                    <div class="col-md-3 mb-3"><label class="form-label" for="{{ form.prioridad.id_for_label }}">Prioridad</label>{{ form.prioridad }}</div>
+                    <div class="col-md-3 mb-3"><label class="form-label" for="{{ form.fecha_vencimiento.id_for_label }}">Vence</label>{{ form.fecha_vencimiento }}{% for e in form.fecha_vencimiento.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</div>
+                    <div class="col-md-3 mb-3"><label class="form-label" for="{{ form.responsable.id_for_label }}">Responsable</label>{{ form.responsable }}</div>
+                </div>
+                {% if editable or not tarea %}
+                <button class="btn btn-primary"><i class="bi bi-save"></i> {% if tarea %}Guardar cambios{% else %}Crear tarea{% endif %}</button>
+                {% elif not puede_editar %}
+                <p class="text-muted small mb-0"><i class="bi bi-eye"></i> Acceso de solo lectura.</p>
+                {% endif %}
+            </form>
+        </div></div>
+    </div>
+    {% if tarea %}
+    <div class="col-lg-4">
+        <div class="card"><div class="card-body small">
+            <h2 class="h6 text-uppercase text-muted">Datos</h2>
+            <table class="table table-sm mb-0">
+                <tr><td>Creada</td><td class="text-end">{{ tarea.creado_en|date:"d/m/Y H:i" }}</td></tr>
+                <tr><td>Por</td><td class="text-end">{% if tarea.creado_por %}{{ tarea.creado_por.get_full_name|default:tarea.creado_por.username }}{% else %}—{% endif %}</td></tr>
+                <tr><td>Actualizada</td><td class="text-end">{{ tarea.actualizado_en|date:"d/m/Y H:i" }}</td></tr>
+                {% if tarea.completada_en %}<tr><td>Completada</td><td class="text-end">{{ tarea.completada_en|date:"d/m/Y H:i" }}</td></tr>{% endif %}
+            </table>
+            {% if tarea.fecha_vencimiento %}<a class="btn btn-sm btn-outline-secondary mt-3" href="{% url 'calendario' %}?fecha={{ tarea.fecha_vencimiento|date:'Y-m-d' }}"><i class="bi bi-calendar3"></i> Ver en el calendario</a>{% endif %}
+        </div></div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

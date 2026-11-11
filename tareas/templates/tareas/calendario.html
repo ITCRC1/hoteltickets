@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% block title %}Calendario{% endblock %}
+
+{% block extra_head %}
+<style>
+    .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+    .cal-head { font-size: .7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--tc-muted); text-align: center; padding: .25rem 0; }
+    .cal-dia { background: var(--tc-surface); border: 1px solid var(--tc-line); border-radius: 8px; min-height: 104px; padding: .35rem; overflow: hidden; }
+    .cal-dia.fuera { opacity: .4; }
+    .cal-dia.hoy { border-color: var(--tc-gold); box-shadow: inset 0 0 0 1px var(--tc-gold); }
+    .cal-dia.sel { background: var(--tc-side-active); }
+    .cal-num { font-weight: 600; font-size: .85rem; text-decoration: none; color: var(--tc-ink); display: inline-block; min-width: 1.6rem; }
+    .cal-dia.hoy .cal-num { color: var(--tc-gold); }
+    .chip-tarea { display: block; width: 100%; text-align: left; border: 0; border-left: 3px solid var(--bs-info); background: rgba(127,127,127,.12);
+        color: var(--tc-ink); font-size: .72rem; padding: 2px 6px; margin-top: 3px; border-radius: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .chip-tarea.p-urgente { border-left-color: var(--bs-danger); } .chip-tarea.p-alta { border-left-color: var(--bs-warning); }
+    .chip-tarea.p-baja { border-left-color: var(--bs-secondary); } .chip-tarea.hecha { text-decoration: line-through; opacity: .6; }
+    .semana .cal-dia { min-height: 280px; }
+    .mini-mes { font-size: .7rem; } .mini-mes .cal-grid { gap: 2px; }
+    .mini-mes .d { text-align: center; border-radius: 4px; padding: 1px 0; color: var(--tc-muted); }
+    .mini-mes .d.con { background: var(--tc-gold); color: var(--tc-accent-ink); font-weight: 700; }
+    .mini-mes .d.fuera { visibility: hidden; }
+    @media (max-width: 767px) { .cal-dia { min-height: 64px; } .chip-tarea { font-size: .6rem; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h3 mb-0"><i class="bi bi-calendar3"></i> Calendario</h1>
+    <div class="d-flex flex-wrap gap-2">
+        <div class="btn-group btn-group-sm" role="group" aria-label="Vista">
+            {% for v, l in vistas %}<a href="{% url 'calendario_vista' v %}?fecha={{ fecha|date:'Y-m-d' }}" class="btn {% if vista == v %}btn-primary{% else %}btn-outline-secondary{% endif %}">{{ l }}</a>{% endfor %}
+        </div>
+        {% if puede_editar %}<a href="{% url 'tarea_crear' %}?fecha={{ fecha|date:'Y-m-d' }}&volver={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg"></i> Nueva tarea</a>{% endif %}
+    </div>
+</div>
+
+<div class="d-flex align-items-center gap-2 mb-3">
+    <a class="btn btn-sm btn-outline-secondary" href="?fecha={{ anterior|date:'Y-m-d' }}" aria-label="Anterior"><i class="bi bi-chevron-left"></i></a>
+    <a class="btn btn-sm btn-outline-secondary" href="?fecha={{ hoy|date:'Y-m-d' }}">Hoy</a>
+    <a class="btn btn-sm btn-outline-secondary" href="?fecha={{ siguiente|date:'Y-m-d' }}" aria-label="Siguiente"><i class="bi bi-chevron-right"></i></a>
+    <h2 class="h5 mb-0 ms-2 text-capitalize">
+        {% if vista == 'anio' %}{{ fecha|date:"Y" }}
+        {% elif vista == 'mes' %}{{ fecha|date:"F Y" }}
+        {% elif vista == 'semana' %}Semana del {{ semanas.0.0.d|date:"j M" }} al {{ semanas.0.6.d|date:"j M Y" }}
+        {% else %}{{ fecha|date:"l j \d\e F Y" }}{% endif %}
+    </h2>
+</div>
+
+{% if vista == 'anio' %}
+<div class="row g-3">
+    {% for m in meses %}
+    <div class="col-6 col-md-4 col-xl-3">
+        <a href="{% url 'calendario_vista' 'mes' %}?fecha={{ m.fecha|date:'Y-m-d' }}" class="card text-decoration-none h-100 mini-mes {% if m.fecha.month == hoy.month and m.fecha.year == hoy.year %}border-warning{% endif %}">
+            <div class="card-body p-2">
+                <div class="d-flex justify-content-between mb-1">
+                    <strong class="text-capitalize">{{ m.fecha|date:"F" }}</strong>
+                    <span>{% if m.total %}<span class="badge badge-soft" title="Tareas del mes">{{ m.total }}</span>{% if m.abiertas %} <span class="badge bg-primary" title="Sin completar">{{ m.abiertas }}</span>{% endif %}{% else %}<span class="text-muted">—</span>{% endif %}</span>
+                </div>
+                <div class="cal-grid">
+                    {% for sem in m.semanas %}{% for c in sem %}<div class="d {% if not c.en_mes %}fuera{% elif c.con %}con{% endif %}">{{ c.d.day }}</div>{% endfor %}{% endfor %}
+                </div>
+            </div>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="row g-3">
+    <div class="{% if vista == 'mes' %}col-xl-9{% else %}col-12{% endif %}">
+        {% if vista != 'dia' %}
+        <div class="cal-grid mb-1">{% for n in "LMXJVSD" %}<div class="cal-head">{% cycle 'Lun' 'Mar' 'Mié' 'Jue' 'Vie' 'Sáb' 'Dom' %}</div>{% endfor %}</div>
+        <div class="{% if vista == 'semana' %}semana{% endif %}">
+            {% for sem in semanas %}
+            <div class="cal-grid mb-1">
+                {% for c in sem %}
+                <div class="cal-dia {% if not c.en_mes %}fuera{% endif %} {% if c.d == hoy %}hoy{% endif %} {% if c.d == fecha %}sel{% endif %}">
+                    <a class="cal-num" href="{% if vista == 'mes' %}?fecha={{ c.d|date:'Y-m-d' }}{% else %}{% url 'calendario_vista' 'dia' %}?fecha={{ c.d|date:'Y-m-d' }}{% endif %}" title="Ver el día">{{ c.d.day }}</a>
+                    {% for t in c.tareas %}
+                        {% if vista == 'semana' or forloop.counter <= 3 %}
+                        <button type="button" class="chip-tarea p-{{ t.prioridad }} {% if t.estado == 'completada' %}hecha{% endif %}" data-tarea="{{ t.pk }}" title="{{ t.titulo }}">{{ t.titulo }}</button>
+                        {% elif forloop.counter == 4 %}
+                        <a class="small text-muted d-block mt-1" href="?fecha={{ c.d|date:'Y-m-d' }}">+{{ c.tareas|length|add:"-3" }} más</a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if vista == 'dia' %}
+        <div class="row g-3 mb-3">
+            <div class="col-4"><div class="card"><div class="card-body py-2"><div class="kpi-label">Pendientes</div><div class="fs-4 fw-bold text-primary">{{ resumen_dia.pendiente }}</div></div></div></div>
+            <div class="col-4"><div class="card"><div class="card-body py-2"><div class="kpi-label">En progreso</div><div class="fs-4 fw-bold text-info">{{ resumen_dia.en_progreso }}</div></div></div></div>
+            <div class="col-4"><div class="card"><div class="card-body py-2"><div class="kpi-label">Completadas</div><div class="fs-4 fw-bold text-success">{{ resumen_dia.completada }}</div></div></div></div>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if vista == 'mes' or vista == 'dia' %}
+    <div class="{% if vista == 'mes' %}col-xl-3{% else %}col-12{% endif %}">
+        <div class="card"><div class="card-body">
+            <h3 class="h6 text-uppercase text-muted">{% if fecha == hoy %}Hoy · {% endif %}{{ fecha|date:"l j \d\e F" }}</h3>
+            {% for t in del_dia %}
+            <button type="button" class="d-block w-100 text-start border-0 bg-transparent border-bottom py-2 px-0" data-tarea="{{ t.pk }}" style="color: inherit">
+                <div class="d-flex justify-content-between gap-2"><span class="fw-semibold {% if t.estado == 'completada' %}text-decoration-line-through{% endif %}">{{ t.titulo }}</span>
+                    <span class="badge bg-{{ t.color_prioridad }}">{{ t.get_prioridad_display }}</span></div>
+                <div class="small"><span class="badge bg-{{ t.color_estado }}">{{ t.get_estado_display }}</span>{% if t.responsable %} <span class="text-muted">· {{ t.responsable.get_full_name|default:t.responsable.username }}</span>{% endif %}</div>
+            </button>
+            {% empty %}
+            <p class="text-muted small mb-0">Sin tareas este día.</p>
+            {% endfor %}
+        </div></div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+{% if sin_fecha %}<p class="small text-muted mt-3"><i class="bi bi-info-circle"></i> {{ sin_fecha }} tarea{{ sin_fecha|pluralize }} sin completar no tiene{{ sin_fecha|pluralize:"n" }} fecha y no aparece{{ sin_fecha|pluralize:"n" }} en el calendario: <a href="{% url 'tarea_lista' %}?vence=sin_fecha">verlas</a>.</p>{% endif %}
+
+<!-- Detalle de una tarea (un solo panel; se llena con los datos de la tarea elegida) -->
+<div class="modal fade" id="detalleTarea" tabindex="-1" aria-labelledby="detalleTitulo" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered"><div class="modal-content" style="background: var(--tc-surface)">
+        <div class="modal-header">
+            <h2 class="modal-title h5" id="detalleTitulo"></h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+            <div class="mb-2"><span id="detalleEstado" class="badge"></span> <span id="detallePrioridad" class="badge"></span> <span id="detalleVencida" class="badge bg-danger d-none">Vencida</span></div>
+            <p id="detalleDescripcion" class="mb-2" style="white-space: pre-line"></p>
+            <div class="small"><strong>Vence:</strong> <span id="detalleVence"></span></div>
+            <div class="small"><strong>Responsable:</strong> <span id="detalleResponsable"></span></div>
+        </div>
+        <div class="modal-footer">
+            <a id="detalleAbrir" href="#" class="btn btn-sm btn-outline-primary">{% if puede_editar %}<i class="bi bi-pencil"></i> Editar{% else %}<i class="bi bi-box-arrow-up-right"></i> Abrir{% endif %}</a>
+            <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+    </div></div>
+</div>
+{{ tareas_json|json_script:"datos-tareas" }}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    (function () {
+        var datos = JSON.parse(document.getElementById('datos-tareas').textContent);
+        var modal = new bootstrap.Modal(document.getElementById('detalleTarea'));
+        var volver = encodeURIComponent(window.location.pathname + window.location.search);
+        function poner(id, texto) { document.getElementById(id).textContent = texto; }
+        document.querySelectorAll('[data-tarea]').forEach(function (b) {
+            b.addEventListener('click', function () {
+                var t = datos[b.getAttribute('data-tarea')];
+                if (!t) return;
+                poner('detalleTitulo', t.titulo);
+                poner('detalleDescripcion', t.descripcion || 'Sin descripción.');
+                poner('detalleVence', t.vence || 'Sin fecha');
+                poner('detalleResponsable', t.responsable || 'Sin responsable');
+                var e = document.getElementById('detalleEstado'); e.textContent = t.estado; e.className = 'badge bg-' + t.color_estado;
+                var p = document.getElementById('detallePrioridad'); p.textContent = 'Prioridad ' + t.prioridad.toLowerCase(); p.className = 'badge bg-' + t.color_prioridad;
+                document.getElementById('detalleVencida').classList.toggle('d-none', !t.vencida);
+                document.getElementById('detalleAbrir').href = '{% url "tarea_lista" %}' + b.getAttribute('data-tarea') + '/?volver=' + volver;
+                modal.show();
+            });
+        });
+    })();
+</script>
+{% endblock %}

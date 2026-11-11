@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% block title %}Tareas{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h3 mb-0"><i class="bi bi-check2-square"></i> Tareas</h1>
+    <div class="d-flex gap-2">
+        <a href="{% url 'calendario' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-calendar3"></i> Calendario</a>
+        {% if puede_editar %}<a href="{% url 'tarea_crear' %}" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg"></i> Nueva tarea</a>{% endif %}
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-6 col-lg"><a class="card kpi-card text-decoration-none h-100" href="{% url 'tarea_lista' %}"><div class="card-body"><div class="kpi-label">Total</div><div class="kpi-number">{{ kpi.total }}</div></div></a></div>
+    <div class="col-6 col-lg"><a class="card kpi-card text-decoration-none h-100" href="?estado=pendiente"><div class="card-body"><div class="kpi-label">Pendientes</div><div class="kpi-number text-primary">{{ kpi.pendientes }}</div></div></a></div>
+    <div class="col-6 col-lg"><a class="card kpi-card text-decoration-none h-100" href="?estado=en_progreso"><div class="card-body"><div class="kpi-label">En progreso</div><div class="kpi-number text-info">{{ kpi.en_progreso }}</div></div></a></div>
+    <div class="col-6 col-lg"><a class="card kpi-card text-decoration-none h-100" href="?estado=completada"><div class="card-body"><div class="kpi-label">Completadas</div><div class="kpi-number text-success">{{ kpi.completadas }}</div></div></a></div>
+    <div class="col-12 col-lg"><a class="card kpi-card text-decoration-none h-100" href="?vence=vencidas"><div class="card-body"><div class="kpi-label">Vencidas</div><div class="kpi-number {% if kpi.vencidas %}text-danger{% endif %}">{{ kpi.vencidas }}</div></div></a></div>
+</div>
+
+<div class="row g-3">
+    <div class="col-xl-9">
+        <div class="card mb-3">
+            <div class="card-body">
+                <form method="get" class="row g-2">
+                    <div class="col-md-4"><input type="text" name="q" class="form-control" placeholder="Buscar tarea…" value="{{ filtros.q }}" aria-label="Buscar"></div>
+                    <div class="col-md-2 col-6">
+                        <select name="estado" class="form-select" aria-label="Estado">
+                            <option value="">Todo estado</option>
+                            <option value="abiertas" {% if filtros.estado == 'abiertas' %}selected{% endif %}>No completadas</option>
+                            {% for v, l in estados %}<option value="{{ v }}" {% if filtros.estado == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 col-6">
+                        <select name="prioridad" class="form-select" aria-label="Prioridad">
+                            <option value="">Toda prioridad</option>
+                            {% for v, l in prioridades %}<option value="{{ v }}" {% if filtros.prioridad == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 col-6">
+                        <select name="vence" class="form-select" aria-label="Vencimiento">
+                            <option value="">Cualquier fecha</option>
+                            <option value="vencidas" {% if filtros.vence == 'vencidas' %}selected{% endif %}>Vencidas</option>
+                            <option value="hoy" {% if filtros.vence == 'hoy' %}selected{% endif %}>Vencen hoy</option>
+                            <option value="semana" {% if filtros.vence == 'semana' %}selected{% endif %}>Próximos 7 días</option>
+                            <option value="sin_fecha" {% if filtros.vence == 'sin_fecha' %}selected{% endif %}>Sin fecha</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 col-6">
+                        <select name="responsable" class="form-select" aria-label="Responsable">
+                            <option value="">Todo responsable</option>
+                            <option value="ninguno" {% if filtros.responsable == 'ninguno' %}selected{% endif %}>Sin responsable</option>
+                            {% for u in responsables %}<option value="{{ u.pk }}" {% if filtros.responsable == u.pk|stringformat:'s' %}selected{% endif %}>{{ u.get_full_name|default:u.username }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <select name="orden" class="form-select" aria-label="Orden">
+                            {% for v, l in ordenes %}<option value="{{ v }}" {% if filtros.orden == v %}selected{% endif %}>Orden: {{ l }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 col-6"><button class="btn btn-primary w-100"><i class="bi bi-search"></i> Filtrar</button></div>
+                    <div class="col-md-2 col-6"><a href="{% url 'tarea_lista' %}" class="btn btn-outline-secondary w-100 {% if not hay_filtros %}disabled{% endif %}"><i class="bi bi-x-lg"></i> Limpiar</a></div>
+                </form>
+            </div>
+        </div>
+
+        <p class="small text-muted mb-2">{{ total }} tarea{{ total|pluralize }}{% if hay_filtros %} con estos filtros{% endif %}</p>
+        <div class="card">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead><tr><th>Tarea</th><th>Prioridad</th><th>Estado</th><th>Vence</th><th>Responsable</th>{% if puede_editar %}<th class="text-end">Cambiar estado</th>{% endif %}</tr></thead>
+                    <tbody>
+                    {% for t in pagina %}
+                        <tr>
+                            <td><a href="{% url 'tarea_editar' t.pk %}" class="fw-semibold text-decoration-none">{{ t.titulo }}</a>
+                                {% if t.descripcion %}<div class="small text-muted text-truncate" style="max-width: 360px">{{ t.descripcion }}</div>{% endif %}</td>
+                            <td><span class="badge bg-{{ t.color_prioridad }}">{{ t.get_prioridad_display }}</span></td>
+                            <td><span class="badge bg-{{ t.color_estado }}">{{ t.get_estado_display }}</span></td>
+                            <td class="small text-nowrap {% if t.vencida %}text-danger fw-semibold{% endif %}">{{ t.fecha_vencimiento|date:"d/m/Y"|default:"—" }}{% if t.vencida %} · vencida{% endif %}</td>
+                            <td class="small">{% if t.responsable %}{{ t.responsable.get_full_name|default:t.responsable.username }}{% else %}—{% endif %}</td>
+                            {% if puede_editar %}
+                            <td class="text-end">
+                                <form method="post" action="{% url 'tarea_estado' t.pk %}" class="d-inline-flex">{% csrf_token %}
+                                    <input type="hidden" name="volver" value="{{ request.get_full_path }}">
+                                    <select name="estado" class="form-select form-select-sm" onchange="this.form.submit()" aria-label="Estado de {{ t.titulo }}">
+                                        {% for v, l in estados %}<option value="{{ v }}" {% if t.estado == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+                                    </select>
+                                </form>
+                            </td>
+                            {% endif %}
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="6" class="text-center text-muted py-5">No hay tareas{% if hay_filtros %} con estos filtros{% endif %}.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% if pagina.has_other_pages %}
+        <nav class="mt-3" aria-label="Páginas"><ul class="pagination pagination-sm">
+            {% if pagina.has_previous %}<li class="page-item"><a class="page-link" href="?{{ query_sin_pagina }}{% if query_sin_pagina %}&{% endif %}page={{ pagina.previous_page_number }}">Anterior</a></li>{% endif %}
+            <li class="page-item disabled"><span class="page-link">{{ pagina.number }} / {{ pagina.paginator.num_pages }}</span></li>
+            {% if pagina.has_next %}<li class="page-item"><a class="page-link" href="?{{ query_sin_pagina }}{% if query_sin_pagina %}&{% endif %}page={{ pagina.next_page_number }}">Siguiente</a></li>{% endif %}
+        </ul></nav>
+        {% endif %}
+    </div>
+
+    <div class="col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="h6 text-uppercase text-muted">Próximos 7 días</h2>
+                {% for t in proximas %}
+                    <a href="{% url 'tarea_editar' t.pk %}" class="d-block text-decoration-none border-bottom py-2">
+                        <div class="d-flex justify-content-between"><span class="fw-semibold">{{ t.titulo }}</span><span class="badge bg-{{ t.color_prioridad }}">{{ t.get_prioridad_display }}</span></div>
+                        <div class="small text-muted">{% if t.fecha_vencimiento == hoy %}Hoy{% else %}{{ t.fecha_vencimiento|date:"l d/m" }}{% endif %}{% if t.responsable %} · {{ t.responsable.get_full_name|default:t.responsable.username }}{% endif %}</div>
+                    </a>
+                {% empty %}
+                    <p class="text-muted small mb-0">Nada programado para los próximos 7 días.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -33,6 +33,12 @@ Proyecto tomado por el Controller (fincontroller@seedcostarica.com) tras la sali
   contador, limpiar filtros, paginación de 25, papelera genérica (`core/papelera.py`, la usarán los demás módulos):
   enviar a papelera Admin/IT, restaurar Admin/IT, borrado definitivo solo Admin con constancia en auditoría. 55 tests.
 
+- 2026-11-11: **Etapas 4 y 5 (tareas + calendario) en staging**: app `tareas` (título, descripción, estado
+  Pendiente/En progreso/Completada, prioridad, vence, responsable), KPIs, filtros (estado, prioridad, vencidas/hoy/
+  7 días/sin fecha, responsable), 4 órdenes, cambio rápido de estado, próximos 7 días, papelera, auditoría con
+  antes→después. Calendario mensual/semanal/diario/anual (Lun–Dom), detalle en un solo panel con Cerrar, crear tarea
+  desde el calendario con la fecha elegida. 67 tests.
+
 ### Pendiente
 - [ ] Revisar `NOTIFICATION_EMAILS` en Railway: puede seguir avisando al responsable anterior.
 - [ ] Correo del usuario `admin` (it@thecostaricacollection.com): confirmar quién tiene ese buzón
