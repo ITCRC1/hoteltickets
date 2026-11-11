@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'inventario',
     'reportes',
     'finanzas',
+    'asistente',
 ]
 
 MIDDLEWARE = [

@@ -36,6 +36,8 @@
         <a class="nav-link {% if url == 'gasto_lista' or url == 'gasto_crear' or url == 'gasto_editar' %}active{% endif %}" href="{% url 'gasto_lista' %}"><i class="bi bi-receipt"></i> Gastos</a>
         <a class="nav-link {% if url == 'suscripcion_lista' or url == 'suscripcion_crear' or url == 'suscripcion_editar' %}active{% endif %}" href="{% url 'suscripcion_lista' %}"><i class="bi bi-arrow-repeat"></i> Suscripciones</a>
         <a class="nav-link {% if url == 'tipos_cambio' %}active{% endif %}" href="{% url 'tipos_cambio' %}"><i class="bi bi-currency-exchange"></i> Tipo de cambio</a>
+        <div class="grupo">Asistente</div>
+        <a class="nav-link {% if url == 'asistente' or url == 'asistente_conversacion' or url == 'configuracion_ia' %}active{% endif %}" href="{% url 'asistente' %}"><i class="bi bi-stars"></i> Claude</a>
         <div class="grupo">Reportes</div>
         <a class="nav-link {% if url == 'reportes' %}active{% endif %}" href="{% url 'reportes' %}"><i class="bi bi-file-earmark-spreadsheet"></i> Exportar a Excel</a>
         {% if puede_editar %}

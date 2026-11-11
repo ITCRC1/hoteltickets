@@ -27,7 +27,7 @@
                 <tr><td>Versión</td><td class="text-end"><code>{{ sistema.version }}</code></td></tr>
                 <tr><td>Usuarios activos</td><td class="text-end"><a href="{% url 'usuarios' %}">{{ sistema.usuarios_activos }}</a></td></tr>
                 <tr><td>Envío de correos</td><td class="text-end">{% if sistema.correo_activo %}<span class="badge bg-success">Activo</span>{% else %}<span class="badge bg-secondary">Apagado (solo consola)</span>{% endif %}</td></tr>
-                <tr><td>Asistente de IA (Claude)</td><td class="text-end">{% if sistema.ia_configurada %}<span class="badge bg-success">Configurado</span>{% else %}<span class="badge bg-secondary">Sin clave de API</span>{% endif %}</td></tr>
+                <tr><td><a href="{% url 'configuracion_ia' %}">Asistente de IA (Claude)</a></td><td class="text-end">{% if sistema.ia_configurada %}<span class="badge bg-success">Configurado</span>{% else %}<span class="badge bg-secondary">Sin clave de API</span>{% endif %}</td></tr>
             </table>
         </div></div>
     </div>

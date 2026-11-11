@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load asistente %}
+{% block title %}Asistente{% endblock %}
+
+{% block extra_head %}
+<style>
+    .chat { min-height: 50vh; max-height: 64vh; overflow-y: auto; }
+    .burbuja { max-width: 85%; border-radius: 12px; padding: .6rem .9rem; }
+    .burbuja.user { background: var(--tc-accent); color: var(--tc-accent-ink); margin-left: auto; white-space: pre-line; }
+    .burbuja.assistant { background: var(--tc-bg); border: 1px solid var(--tc-line); }
+    .burbuja.assistant p:last-child, .burbuja.assistant ul:last-child, .burbuja.assistant ol:last-child { margin-bottom: 0; }
+    .lista-conv a { display: block; padding: .4rem .6rem; border-radius: 6px; text-decoration: none; color: var(--tc-ink); }
+    .lista-conv a.activa, .lista-conv a:hover { background: var(--tc-side-active); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h3 mb-0"><i class="bi bi-stars"></i> Asistente</h1>
+    <div class="d-flex gap-2">
+        {% if es_admin %}<a href="{% url 'configuracion_ia' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-sliders"></i> Configurar</a>{% endif %}
+        <a href="{% url 'asistente' %}" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg"></i> Nueva conversación</a>
+    </div>
+</div>
+
+{% if not habilitado %}
+<div class="alert alert-secondary">
+    <i class="bi bi-plug"></i>
+    {% if not clave %}El asistente todavía no está conectado: falta la clave de la API de Anthropic
+        (variable <code>ANTHROPIC_API_KEY</code> en Railway).{% if es_admin %} Las instrucciones están en <a href="{% url 'configuracion_ia' %}">Configurar</a>.{% else %} Avisa al Administrador.{% endif %}
+    {% else %}El Administrador desactivó el asistente.{% endif %}
+</div>
+{% endif %}
+
+<div class="row g-3">
+    <div class="col-lg-3">
+        <div class="card"><div class="card-body p-2 lista-conv">
+            <div class="small text-muted px-2 py-1">Tus conversaciones (solo tú las ves)</div>
+            {% for c in conversaciones %}
+            <a href="{% url 'asistente_conversacion' c.pk %}" class="{% if c == actual %}activa{% endif %}">
+                <div class="text-truncate small fw-semibold">{{ c.titulo }}</div>
+                <div class="small text-muted">{{ c.actualizada_en|date:"d/m H:i" }}</div>
+            </a>
+            {% empty %}<p class="small text-muted px-2 mb-1">Todavía no hay conversaciones.</p>{% endfor %}
+        </div></div>
+    </div>
+
+    <div class="col-lg-9">
+        <div class="card"><div class="card-body">
+            <div class="chat d-flex flex-column gap-2 mb-3" id="chat">
+                {% for m in mensajes %}
+                    {% if m.rol == 'user' %}<div class="burbuja user">{{ m.texto }}</div>
+                    {% else %}<div class="burbuja assistant">{{ m.texto|markdown_seguro }}</div>{% endif %}
+                {% empty %}
+                <div class="text-muted small">
+                    <p class="mb-2">Pregúntame lo que necesites. Por ejemplo:</p>
+                    <ul class="mb-0">
+                        <li>¿Cuántos tickets pendientes hay y cuáles son urgentes?</li>
+                        <li>¿Qué tareas tengo esta semana?</li>
+                        <li>¿Cuántas computadoras tenemos en Corcovado?</li>
+                        <li>¿Cuánto llevamos gastado del presupuesto y qué renovamos este mes?</li>
+                        <li>Redacta un correo para avisar del mantenimiento del servidor el sábado.</li>
+                        {% if puede_editar and acciones_habilitadas %}<li>Crea una tarea para revisar las UPS de Amarena el viernes.</li>{% endif %}
+                    </ul>
+                </div>
+                {% endfor %}
+
+                {% for a in acciones %}
+                <div class="card border-{% if a.estado == 'pendiente' %}warning{% elif a.estado == 'confirmada' %}success{% else %}secondary{% endif %}">
+                    <div class="card-body py-2 small">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                            <span><i class="bi bi-lightning-charge"></i> <strong>Propuesta #{{ a.pk }}:</strong> {{ a.resumen }}</span>
+                            {% if a.estado == 'pendiente' %}
+                            <span class="d-flex gap-2">
+                                <form method="post" action="{% url 'asistente_accion' a.pk 'confirmar' %}">{% csrf_token %}<button class="btn btn-sm btn-primary"><i class="bi bi-check-lg"></i> Confirmar</button></form>
+                                <form method="post" action="{% url 'asistente_accion' a.pk 'rechazar' %}">{% csrf_token %}<button class="btn btn-sm btn-outline-secondary">Rechazar</button></form>
+                            </span>
+                            {% else %}
+                            <span class="badge bg-{% if a.estado == 'confirmada' %}success{% elif a.estado == 'error' %}danger{% else %}secondary{% endif %}">{{ a.get_estado_display }}</span>
+                            {% endif %}
+                        </div>
+                        {% if a.resultado and a.estado != 'rechazada' %}<div class="text-muted mt-1">{{ a.resultado|markdown_seguro }}</div>{% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <form method="post" action="{% if actual %}{% url 'asistente_enviar_conversacion' actual.pk %}{% else %}{% url 'asistente_enviar' %}{% endif %}" id="form-chat">
+                {% csrf_token %}
+                <div class="input-group">
+                    <textarea name="texto" class="form-control" rows="2" maxlength="4000" placeholder="Escribe tu pregunta…" aria-label="Mensaje" {% if not habilitado %}disabled{% endif %} required></textarea>
+                    <button class="btn btn-primary" id="btn-enviar" {% if not habilitado %}disabled{% endif %}><i class="bi bi-send"></i> Enviar</button>
+                </div>
+                <div class="d-flex justify-content-between mt-1">
+                    <span class="small text-muted" id="estado-envio">Enter para enviar · Shift+Enter para salto de línea. Las respuestas pueden tener errores: verifica lo importante.</span>
+                    {% if actual %}<button form="form-borrar" class="btn btn-link btn-sm text-muted p-0">Borrar conversación</button>{% endif %}
+                </div>
+            </form>
+            {% if actual %}<form method="post" action="{% url 'asistente_borrar' actual.pk %}" id="form-borrar" onsubmit="return confirm('¿Borrar esta conversación?');">{% csrf_token %}</form>{% endif %}
+        </div></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    (function () {
+        var chat = document.getElementById('chat');
+        chat.scrollTop = chat.scrollHeight;
+        var form = document.getElementById('form-chat');
+        var area = form.querySelector('textarea');
+        area.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (area.value.trim()) form.requestSubmit(); }
+        });
+        form.addEventListener('submit', function () {
+            var b = document.getElementById('btn-enviar');
+            b.disabled = true; b.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Pensando…';
+            document.getElementById('estado-envio').textContent = 'Consultando… puede tardar unos segundos.';
+            area.readOnly = true;
+        });
+    })();
+</script>
+{% endblock %}

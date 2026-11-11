@@ -73,7 +73,15 @@ Proyecto tomado por el Controller (fincontroller@seedcostarica.com) tras la sali
   externos (`core/seguridad.py`), sin plantillas con salida sin escapar, `check --deploy` limpio con valores de prod,
   `scripts/respaldo.py` (respaldo SQL de solo lectura, funciona aunque el código esté adelantado a prod; probado en
   staging: 28 tablas), variables prod = staging, checklist de paso a producción en CLAUDE.md. 120 tests.
-  Falta: Etapa 11 (IA, espera autorización de la clave de Anthropic) y el paso a producción de las Etapas 3–12.
+
+- 2026-11-11: **Etapa 11 (asistente IA) en staging, apagado hasta configurar la clave**: app `asistente` con Claude
+  (`claude-opus-5-5`, razonamiento adaptativo, esfuerzo medium, respaldo ante rechazos `fallbacks: "default"`, caché
+  de instrucciones/herramientas). Chat privado por usuario, conocimiento general + 7 herramientas de consulta (tickets,
+  tareas, inventario, finanzas, gastos, suscripciones, enlace a Excel) con los permisos del usuario, y 3 acciones
+  (crear tarea, registrar gasto, actualizar ticket) que solo PROPONEN: se guardan al pulsar Confirmar, re-validando
+  permisos, auditadas "Vía asistente IA". Historial de solo anexar (bloques tal cual). Configuración (Admin):
+  activar/desactivar, permitir acciones, uso y costo estimado del mes, errores. Clave en `ANTHROPIC_API_KEY` (Railway).
+  gunicorn --timeout 120. 140 tests (cliente simulado) + prueba del SDK real con transporte local.
 
 ### Pendiente
 - [ ] Avisos: hoy van solo a it@thecostaricacollection.com (buzón del ex responsable). Al pasar la Etapa 12 a prod,
