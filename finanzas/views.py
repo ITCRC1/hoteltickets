@@ -14,6 +14,7 @@ from django.views.decorators.http import require_POST
 
 from core import roles
 from core.auditoria import auditar
+from core.seguridad import destino_seguro
 
 from .calculos import CERO, renovaciones, resumen_anual, sumar_meses
 from .forms import GastoForm, PresupuestoForm, SuscripcionForm, TipoCambioForm
@@ -78,13 +79,13 @@ def _formulario(request, Modelo, Form, pk, modulo, titulo, volver):
         if form.is_valid():
             antes = Modelo.todos.get(pk=obj.pk) if obj else None
             _guardar(request, form, antes, modulo, Form.Meta.fields, f'{titulo} registrado.', f'{titulo} actualizado.')
-            return redirect(request.POST.get('volver') or volver)
+            return redirect(destino_seguro(request.POST.get('volver'), volver))
     if not editable:
         for campo in form.fields.values():
             campo.disabled = True
     return render(request, 'finanzas/form.html', {
         'form': form, 'obj': obj, 'titulo': titulo, 'editable': editable or obj is None,
-        'volver': request.GET.get('volver') or volver, 'eliminar_url': f'{modulo}_eliminar' if obj else None,
+        'volver': destino_seguro(request.GET.get('volver'), volver), 'eliminar_url': f'{modulo}_eliminar' if obj else None,
     })
 
 

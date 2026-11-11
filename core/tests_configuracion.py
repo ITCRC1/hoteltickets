@@ -85,3 +85,20 @@ class Configuracion(TestCase):
         r = self.client.get(reverse('configuracion'))
         self.assertContains(r, 'Roles y permisos')
         self.assertFalse(r.context['sistema']['ia_configurada'])
+
+
+class DestinoSeguro(TestCase):
+    """Etapa 13: el parámetro 'volver' no permite redirigir fuera de la app."""
+
+    def test_solo_rutas_internas(self):
+        from .seguridad import destino_seguro
+        self.assertEqual(destino_seguro('/tareas/?estado=pendiente', 'x'), '/tareas/?estado=pendiente')
+        for malo in ('https://evil.com', '//evil.com', 'javascript:alert(1)', '', None, '/\evil.com', ' http://a'):
+            self.assertEqual(destino_seguro(malo, 'x'), 'x', malo)
+
+    def test_crear_tarea_no_redirige_afuera(self):
+        admin = usuario('admin@x.com', roles.ADMIN)
+        self.client.force_login(admin)
+        r = self.client.post(reverse('tarea_crear'), {'titulo': 'X', 'estado': 'pendiente', 'prioridad': 'normal',
+                                                      'volver': 'https://evil.com/robar'})
+        self.assertEqual(r['Location'], reverse('tarea_lista'))

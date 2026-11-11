@@ -16,6 +16,7 @@ from django.views.decorators.http import require_POST
 
 from core import roles
 from core.auditoria import auditar
+from core.seguridad import destino_seguro
 
 from .forms import TareaForm
 from .models import Tarea
@@ -122,8 +123,8 @@ def tarea_crear(request):
         t.save()
         auditar(request, 'CREADA', 'tareas', objeto=t, detalle=t.resumen_para_auditoria())
         messages.success(request, f'Tarea "{t.titulo}" creada.')
-        return redirect(request.POST.get('volver') or 'tarea_lista')
-    return render(request, 'tareas/form.html', {'form': form, 'tarea': None, 'volver': request.GET.get('volver', '')})
+        return redirect(destino_seguro(request.POST.get('volver'), 'tarea_lista'))
+    return render(request, 'tareas/form.html', {'form': form, 'tarea': None, 'volver': destino_seguro(request.GET.get('volver'), '')})
 
 
 @roles.requiere_rol()
@@ -145,12 +146,12 @@ def tarea_editar(request, pk):
                 t.save()
                 auditar(request, 'EDITADA', 'tareas', objeto=t, cambios=cambios)
                 messages.success(request, 'Tarea actualizada.')
-            return redirect(request.POST.get('volver') or 'tarea_lista')
+            return redirect(destino_seguro(request.POST.get('volver'), 'tarea_lista'))
     if not editable:
         for campo in form.fields.values():
             campo.disabled = True
     return render(request, 'tareas/form.html', {'form': form, 'tarea': t, 'editable': editable,
-                                                'volver': request.GET.get('volver', '')})
+                                                'volver': destino_seguro(request.GET.get('volver'), '')})
 
 
 @require_POST
@@ -165,7 +166,7 @@ def tarea_estado(request, pk):
         t.save()
         auditar(request, 'EDITADA', 'tareas', objeto=t, cambios={'estado': [antes, t.get_estado_display()]})
         messages.success(request, f'"{t.titulo}": {t.get_estado_display()}.')
-    return redirect(request.POST.get('volver') or 'tarea_lista')
+    return redirect(destino_seguro(request.POST.get('volver'), 'tarea_lista'))
 
 
 @require_POST

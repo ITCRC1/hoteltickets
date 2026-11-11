@@ -24,6 +24,16 @@ Cada etapa: staging → pruebas → aprobación del Controller → producción. 
 - Refrescar staging con datos de prod: `scripts\copy_prod_to_staging.py` (solo lee prod; reemplaza staging).
 - Los scripts siempre pasan `-e production` / `-e staging` explícito; no dependen de `railway link`.
 
+## Paso de staging a producción (checklist)
+1. Tests en verde: `.env\Scripts\python.exe manage.py test` (con `DATABASE_URL` vacío).
+2. Staging desplegado y probado por el Controller (sus datos son copia de prod: valida las migraciones con datos reales).
+3. Variables: comparar nombres prod vs staging (`railway variables -s Tickets -e <ambiente> --json`); si una etapa
+   necesita una variable nueva, crearla en prod ANTES del merge.
+4. Respaldo de prod: `.env\Scripts\python.exe scriptsespaldo.py` (SQL de solo lectura, no depende del código).
+5. Merge: `git checkout main; git merge --ff-only staging; git push origin main; git checkout staging`
+   (el push a `main` lo hace el Controller: el entorno de Claude bloquea deploys a producción).
+6. Verificar: deploy SUCCESS, logs con `Applying …` sin `SystemCheckError`, `/` y `/accounts/login/` en 200.
+
 ## Roles y acceso (Etapa 2)
 - `core/roles.py`: **Administrador** (todo; = superusuario, entra al admin técnico), **IT Support** (atiende,
   no administra), **Solo lectura**. Verificar SIEMPRE en la vista con `@roles.requiere_rol(...)` /
@@ -53,6 +63,7 @@ Sin `DATABASE_URL` usa SQLite (`db.sqlite3`); en Railway usa Postgres.
 ## Comandos (PowerShell, desde `C:\dev\hoteltickets`)
 - Levantar local: `start-local.cmd` (o `.\venv\Scripts\python.exe manage.py runserver 8001`) → http://127.0.0.1:8001
   (el 8000 lo usa otro proyecto).
+- Respaldo de prod (o `--staging`): `.env\Scripts\python.exe scriptsespaldo.py` → `.local/respaldos/`.
 - Copiar producción → local: `.\venv\Scripts\python.exe scripts\pull_prod_db.py` (solo lee prod; reemplaza
   `db.sqlite3`, respaldo en `.local/`).
 - Comando contra producción: `.\venv\Scripts\python.exe scripts\prod_manage.py <comando>` (pide escribir PROD);

@@ -69,6 +69,12 @@ Proyecto tomado por el Controller (fincontroller@seedcostarica.com) tras la sali
   categorías de gasto: se desactivan, no se borran), Directorio correo → departamento (sí se borra), estado del sistema,
   matriz de roles y permisos, seguridad. Todo auditado. 118 tests.
 
+- 2026-11-11: **Etapa 13 (preparación) en staging**: parámetro `volver` protegido contra redirecciones a sitios
+  externos (`core/seguridad.py`), sin plantillas con salida sin escapar, `check --deploy` limpio con valores de prod,
+  `scripts/respaldo.py` (respaldo SQL de solo lectura, funciona aunque el código esté adelantado a prod; probado en
+  staging: 28 tablas), variables prod = staging, checklist de paso a producción en CLAUDE.md. 120 tests.
+  Falta: Etapa 11 (IA, espera autorización de la clave de Anthropic) y el paso a producción de las Etapas 3–12.
+
 ### Pendiente
 - [ ] Avisos: hoy van solo a it@thecostaricacollection.com (buzón del ex responsable). Al pasar la Etapa 12 a prod,
       el Controller los cambia en Configuración.
