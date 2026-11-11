@@ -241,3 +241,51 @@ class Papelera(Base):
         t.enviar_a_papelera(self.admin)
         self.client.force_login(self.lector)
         self.assertEqual(self.client.get(reverse('ticket_detalle', args=[t.pk])).status_code, 404)
+
+
+class DashboardIntegral(Base):
+    """Etapa 8: el dashboard muestra indicadores reales de todos los módulos."""
+
+    def test_indicadores_de_todos_los_modulos(self):
+        from datetime import timedelta
+        from decimal import Decimal
+
+        from django.utils import timezone
+
+        from finanzas.models import CategoriaGasto, Gasto, Presupuesto, Suscripcion
+        from inventario.models import Activo, CategoriaActivo, EstadoActivo
+        from tareas.models import Tarea
+
+        hoy = timezone.localdate()
+        self.ticket(estado='abierto', prioridad='urgente')
+        self.ticket(estado='en_espera')
+        self.ticket(estado='cerrado')
+        Tarea.objects.create(titulo='Próxima', fecha_vencimiento=hoy + timedelta(days=2))
+        Tarea.objects.create(titulo='Vencida', fecha_vencimiento=hoy - timedelta(days=2))
+        Tarea.objects.create(titulo='Hecha', estado='completada')
+        Activo.objects.create(nombre='PC', categoria=CategoriaActivo.objects.first(), ubicacion=self.hotel,
+                              estado=EstadoActivo.objects.first())
+        hw = CategoriaGasto.objects.get(nombre='Hardware')
+        Presupuesto.objects.create(anio=hoy.year, categoria=hw, monto=Decimal('1000'), moneda='USD')
+        Gasto.objects.create(fecha=hoy, concepto='Disco', categoria=hw, monto=Decimal('250'), moneda='USD')
+        Suscripcion.objects.create(nombre='Zoom', categoria=hw, costo=Decimal('15'), proxima_renovacion=hoy + timedelta(days=10))
+
+        self.client.force_login(self.lector)
+        r = self.client.get(reverse('dashboard'))
+        d = r.context['depto']
+        self.assertEqual(d['tickets'], {'abiertos': 1, 'pendientes': 1, 'resueltos': 1, 'urgentes': 1})
+        self.assertEqual((d['tareas']['total'], d['tareas']['pendientes'], d['tareas']['completadas'], d['tareas']['vencidas']),
+                         (3, 2, 1, 1))
+        self.assertEqual([t.titulo for t in d['proximas']], ['Próxima'])
+        self.assertEqual(d['equipos'], 1)
+        self.assertEqual((d['presupuesto']['asignado'], d['presupuesto']['utilizado'], d['presupuesto']['disponible']),
+                         (Decimal('1000.00'), Decimal('250.00'), Decimal('750.00')))
+        self.assertEqual(d['suscripciones_por_vencer'], 1)
+        self.assertContains(r, 'Zoom')
+        self.assertContains(r, '1 urgente sin resolver')
+
+    def test_dashboard_vacio_no_falla(self):
+        self.client.force_login(self.lector)
+        r = self.client.get(reverse('dashboard'))
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, 'Nada programado')

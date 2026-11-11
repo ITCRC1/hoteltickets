@@ -1,12 +1,91 @@
 {% extends 'base.html' %}
-{% load humanize %}
+{% load humanize plataforma %}
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0"><i class="bi bi-speedometer2"></i> Dashboard</h2>
-    <div class="text-muted small">{{ tickets_7d }} tickets nuevos en los últimos 7 días</div>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h3 mb-0"><i class="bi bi-speedometer2"></i> Dashboard</h1>
+    <div class="d-flex flex-wrap gap-2">
+        {% if puede_editar %}<a href="{% url 'tarea_crear' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-plus-lg"></i> Tarea</a>
+        <a href="{% url 'activo_crear' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-plus-lg"></i> Equipo</a>{% endif %}
+        {% if es_admin %}<a href="{% url 'gasto_crear' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-plus-lg"></i> Gasto</a>{% endif %}
+        <a href="{% url 'calendario' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-calendar3"></i> Calendario</a>
+    </div>
 </div>
+
+<!-- Resumen del departamento -->
+<div class="row g-3 mb-3">
+    <div class="col-md-6 col-xl-3">
+        <a href="{% url 'ticket_lista' %}?estado=abiertos" class="card kpi-card h-100 text-decoration-none"><div class="card-body">
+            <div class="kpi-label"><i class="bi bi-ticket-perforated"></i> Tickets</div>
+            <div class="d-flex gap-3 mt-1">
+                <div><div class="fs-3 fw-bold text-primary">{{ depto.tickets.abiertos }}</div><div class="small text-muted">abiertos</div></div>
+                <div><div class="fs-3 fw-bold text-info">{{ depto.tickets.pendientes }}</div><div class="small text-muted">en curso / espera</div></div>
+                <div><div class="fs-3 fw-bold text-success">{{ depto.tickets.resueltos }}</div><div class="small text-muted">resueltos</div></div>
+            </div>
+            {% if depto.tickets.urgentes %}<div class="small text-danger mt-1"><i class="bi bi-exclamation-octagon"></i> {{ depto.tickets.urgentes }} urgente{{ depto.tickets.urgentes|pluralize }} sin resolver</div>{% endif %}
+        </div></a>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <a href="{% url 'tarea_lista' %}" class="card kpi-card h-100 text-decoration-none"><div class="card-body">
+            <div class="kpi-label"><i class="bi bi-check2-square"></i> Tareas · {{ depto.tareas.total }}</div>
+            <div class="d-flex gap-3 mt-1">
+                <div><div class="fs-3 fw-bold text-primary">{{ depto.tareas.pendientes }}</div><div class="small text-muted">pendientes</div></div>
+                <div><div class="fs-3 fw-bold text-info">{{ depto.tareas.en_progreso }}</div><div class="small text-muted">en progreso</div></div>
+                <div><div class="fs-3 fw-bold text-success">{{ depto.tareas.completadas }}</div><div class="small text-muted">completadas</div></div>
+            </div>
+            {% if depto.tareas.vencidas %}<div class="small text-danger mt-1"><i class="bi bi-clock-history"></i> {{ depto.tareas.vencidas }} vencida{{ depto.tareas.vencidas|pluralize }}</div>{% endif %}
+        </div></a>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <a href="{% url 'presupuesto_resumen' %}" class="card kpi-card h-100 text-decoration-none"><div class="card-body">
+            <div class="kpi-label"><i class="bi bi-wallet2"></i> Presupuesto {{ depto.hoy.year }} (USD)</div>
+            <div class="fs-4 fw-bold mt-1">${{ depto.presupuesto.asignado|dinero:0 }}</div>
+            <div class="small">Utilizado <strong>${{ depto.presupuesto.utilizado|dinero:0 }}</strong> · Disponible
+                <strong class="{% if depto.presupuesto.disponible < 0 %}text-danger{% else %}text-success{% endif %}">${{ depto.presupuesto.disponible|dinero:0 }}</strong></div>
+            {% if depto.presupuesto.ejecucion is not None %}
+            <div class="progress mt-2" style="height: 6px" role="progressbar" aria-label="Ejecución del presupuesto" aria-valuenow="{{ depto.presupuesto.ejecucion|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-bar {% if depto.presupuesto.ejecucion > 100 %}bg-danger{% endif %}" style="width: {% if depto.presupuesto.ejecucion > 100 %}100{% else %}{{ depto.presupuesto.ejecucion|floatformat:0 }}{% endif %}%; {% if depto.presupuesto.ejecucion <= 100 %}background: var(--tc-gold){% endif %}"></div></div>
+            {% endif %}
+            {% if depto.presupuesto_avisos %}<div class="small text-warning mt-1"><i class="bi bi-exclamation-triangle"></i> {{ depto.presupuesto_avisos }} monto{{ depto.presupuesto_avisos|pluralize }} sin tipo de cambio</div>{% endif %}
+        </div></a>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="row g-3 h-100">
+            <div class="col-6 col-xl-12"><a href="{% url 'activo_lista' %}" class="card kpi-card h-100 text-decoration-none"><div class="card-body py-2">
+                <div class="kpi-label"><i class="bi bi-pc-display"></i> Equipos en inventario</div><div class="fs-3 fw-bold">{{ depto.equipos }}</div></div></a></div>
+            <div class="col-6 col-xl-12"><a href="{% url 'suscripcion_lista' %}?renovacion=30" class="card kpi-card h-100 text-decoration-none"><div class="card-body py-2">
+                <div class="kpi-label"><i class="bi bi-arrow-repeat"></i> Suscripciones por vencer (30 d)</div><div class="fs-3 fw-bold {% if depto.suscripciones_por_vencer %}text-warning{% endif %}">{{ depto.suscripciones_por_vencer }}</div></div></a></div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-6">
+        <div class="card h-100"><div class="card-body">
+            <div class="d-flex justify-content-between"><h2 class="h6 text-uppercase text-muted">Actividades próximas (7 días)</h2><a class="small" href="{% url 'calendario_vista' 'semana' %}">Ver semana</a></div>
+            {% for t in depto.proximas %}
+            <a href="{% url 'tarea_editar' t.pk %}" class="d-flex justify-content-between align-items-center border-bottom py-2 text-decoration-none">
+                <span><span class="fw-semibold">{{ t.titulo }}</span><span class="small text-muted d-block">{% if t.fecha_vencimiento == depto.hoy %}Hoy{% else %}{{ t.fecha_vencimiento|date:"l j/n" }}{% endif %}{% if t.responsable %} · {{ t.responsable.get_full_name|default:t.responsable.username }}{% endif %}</span></span>
+                <span class="badge bg-{{ t.color_prioridad }}">{{ t.get_prioridad_display }}</span>
+            </a>
+            {% empty %}<p class="text-muted small mb-0">Nada programado para los próximos 7 días.</p>{% endfor %}
+        </div></div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100"><div class="card-body">
+            <div class="d-flex justify-content-between"><h2 class="h6 text-uppercase text-muted">Renovaciones próximas (30 días)</h2><a class="small" href="{% url 'suscripcion_lista' %}">Ver todas</a></div>
+            {% for s in depto.suscripciones_lista %}
+            <a href="{% url 'suscripcion_editar' s.pk %}" class="d-flex justify-content-between align-items-center border-bottom py-2 text-decoration-none">
+                <span><span class="fw-semibold">{{ s.nombre }}</span><span class="small text-muted d-block">{{ s.proveedor|default:"" }}{% if s.proveedor %} · {% endif %}{{ s.get_frecuencia_display }}</span></span>
+                <span class="text-end small"><strong>{{ s.proxima_renovacion|date:"j/n" }}</strong><span class="d-block text-muted">{% if s.moneda == 'USD' %}${% else %}₡{% endif %}{{ s.costo|dinero }}</span></span>
+            </a>
+            {% empty %}<p class="text-muted small mb-0">Ninguna suscripción renueva en los próximos 30 días.</p>{% endfor %}
+        </div></div>
+    </div>
+</div>
+
+<h2 class="h5 mb-3"><i class="bi bi-ticket-perforated"></i> Tickets <span class="small text-muted fw-normal">· {{ tickets_7d }} nuevo{{ tickets_7d|pluralize }} en los últimos 7 días</span></h2>
 
 <!-- KPIs principales -->
 <div class="row g-3 mb-4">
@@ -60,7 +139,7 @@
     <div class="col-lg-6">
         <div class="card h-100">
             <div class="card-body">
-                <h5 class="card-title"><i class="bi bi-bar-chart"></i> Estado actual</h5>
+                <h3 class="h6 card-title"><i class="bi bi-bar-chart"></i> Estado actual</h3>
                 <table class="table table-sm mt-3">
                     <tbody>
                         <tr><td><span class="badge bg-primary">Abierto</span></td><td class="text-end fw-bold">{{ abiertos }}</td></tr>
@@ -78,7 +157,7 @@
     <div class="col-lg-6">
         <div class="card h-100">
             <div class="card-body">
-                <h5 class="card-title"><i class="bi bi-building"></i> Por hotel</h5>
+                <h3 class="h6 card-title"><i class="bi bi-building"></i> Por hotel</h3>
                 <table class="table table-sm mt-3">
                     <thead><tr><th>Hotel</th><th class="text-end">Abiertos</th><th class="text-end">Resueltos</th><th class="text-end">Total</th></tr></thead>
                     <tbody>
@@ -102,7 +181,7 @@
     <div class="col-lg-6">
         <div class="card h-100">
             <div class="card-body">
-                <h5 class="card-title"><i class="bi bi-tags"></i> Top categorías</h5>
+                <h3 class="h6 card-title"><i class="bi bi-tags"></i> Top categorías</h3>
                 <table class="table table-sm mt-3">
                     {% for c in por_categoria %}
                     <tr>
@@ -123,10 +202,10 @@
     <div class="col-lg-6">
         <div class="card h-100">
             <div class="card-body">
-                <h5 class="card-title d-flex justify-content-between">
+                <h3 class="h6 card-title d-flex justify-content-between">
                     <span><i class="bi bi-clock-history"></i> Recientes</span>
                     <a href="{% url 'ticket_lista' %}" class="btn btn-sm btn-outline-primary">Ver todos</a>
-                </h5>
+                </h3>
                 <div class="list-group list-group-flush mt-3">
                     {% for t in recientes %}
                     <a href="{% url 'ticket_detalle' t.pk %}" class="list-group-item list-group-item-action px-0">

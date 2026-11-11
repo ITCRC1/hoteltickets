@@ -144,8 +144,40 @@ def dashboard(request):
         'por_hotel': por_hotel,
         'por_categoria': por_categoria,
         'recientes': recientes,
+        'depto': _resumen_departamento(),
     }
     return render(request, 'tickets/dashboard.html', context)
+
+
+def _resumen_departamento():
+    """Indicadores de todos los módulos para el dashboard (datos reales; presupuesto del año en USD)."""
+    from finanzas.calculos import resumen_anual
+    from finanzas.models import Suscripcion
+    from inventario.models import Activo
+    from tareas.models import Tarea
+
+    hoy = timezone.localdate()
+    tareas = Tarea.objects.all()
+    presupuesto = resumen_anual(hoy.year, 'USD', hoy)
+    por_vencer = Suscripcion.objects.filter(estado='activa', proxima_renovacion__range=(hoy, hoy + timedelta(days=30)))
+    return {
+        'hoy': hoy,
+        'tareas': {'total': tareas.count(), 'pendientes': tareas.filter(estado='pendiente').count(),
+                   'en_progreso': tareas.filter(estado='en_progreso').count(),
+                   'completadas': tareas.filter(estado='completada').count(),
+                   'vencidas': tareas.exclude(estado='completada').filter(fecha_vencimiento__lt=hoy).count()},
+        'tickets': {'abiertos': Ticket.objects.filter(estado='abierto').count(),
+                    'pendientes': Ticket.objects.filter(estado__in=('en_progreso', 'en_espera')).count(),
+                    'resueltos': Ticket.objects.filter(estado__in=('resuelto', 'cerrado')).count(),
+                    'urgentes': Ticket.objects.filter(estado__in=Ticket.ESTADOS_ABIERTOS, prioridad='urgente').count()},
+        'equipos': Activo.objects.count(),
+        'proximas': tareas.exclude(estado='completada').filter(fecha_vencimiento__range=(hoy, hoy + timedelta(days=7)))
+                          .select_related('responsable').order_by('fecha_vencimiento')[:6],
+        'presupuesto': presupuesto['total'],
+        'presupuesto_avisos': len(presupuesto['sin_tipo']) + len(presupuesto['presupuesto_sin_tipo']),
+        'suscripciones_por_vencer': por_vencer.count(),
+        'suscripciones_lista': por_vencer.order_by('proxima_renovacion')[:5],
+    }
 
 
 # Órdenes disponibles en la lista: clave → (etiqueta, orden)

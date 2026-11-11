@@ -58,6 +58,11 @@ Proyecto tomado por el Controller (fincontroller@seedcostarica.com) tras la sali
   pago" (crea el gasto y adelanta la renovación). Solo Administrador registra/edita; todos consultan. Excel de
   presupuesto, gastos y suscripciones. Orden cambiado: Etapa 8 (dashboard) va después, ya con todos los datos. 107 tests.
 
+- 2026-11-11: **Etapa 8 (dashboard integral) en staging**: arriba del análisis de tickets, indicadores reales de
+  tickets (abiertos/en curso/resueltos/urgentes), tareas (pendientes/en progreso/completadas/vencidas), presupuesto del
+  año en USD (asignado/utilizado/disponible con barra y aviso de montos sin tipo de cambio), equipos, suscripciones por
+  vencer, actividades próximas 7 días, renovaciones 30 días y accesos directos según el rol. 109 tests.
+
 ### Pendiente
 - [ ] Revisar `NOTIFICATION_EMAILS` en Railway: puede seguir avisando al responsable anterior.
 - [ ] Correo del usuario `admin` (it@thecostaricacollection.com): confirmar quién tiene ese buzón
