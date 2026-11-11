@@ -6,6 +6,7 @@ urlpatterns = [
     path('', include('core.urls')),
     path('', include('tickets.urls')),
     path('', include('tareas.urls')),
+    path('', include('inventario.urls')),
 ]
 
 # Personalizar títulos del admin

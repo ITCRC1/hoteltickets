@@ -39,6 +39,11 @@ Proyecto tomado por el Controller (fincontroller@seedcostarica.com) tras la sali
   antes→después. Calendario mensual/semanal/diario/anual (Lun–Dom), detalle en un solo panel con Cerrar, crear tarea
   desde el calendario con la fecha elegida. 67 tests.
 
+- 2026-11-11: **Etapa 6 (inventario) en staging**: app `inventario` con categorías (12 sembradas) y estados (5)
+  ampliables desde la administración, ubicación = misma tabla de tickets, código automático TI-00001 o manual único
+  (también contra la papelera), garantía con aviso a 90 días, estadísticas (estado, categoría, ubicación, garantías),
+  búsqueda/filtros/6 órdenes/paginación, papelera y auditoría. 78 tests.
+
 ### Pendiente
 - [ ] Revisar `NOTIFICATION_EMAILS` en Railway: puede seguir avisando al responsable anterior.
 - [ ] Correo del usuario `admin` (it@thecostaricacollection.com): confirmar quién tiene ese buzón

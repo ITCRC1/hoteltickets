@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'core',
     'tickets',
     'tareas',
+    'inventario',
 ]
 
 MIDDLEWARE = [

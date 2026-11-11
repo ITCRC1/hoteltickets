@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block title %}Inventario{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h3 mb-0"><i class="bi bi-pc-display"></i> Inventario</h1>
+    <div class="d-flex gap-2">
+        {% block acciones_extra %}{% endblock %}
+        {% if puede_editar %}<a href="{% url 'activo_crear' %}" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg"></i> Registrar equipo</a>{% endif %}
+    </div>
+</div>
+
+<!-- Estadísticas -->
+<div class="row g-3 mb-3">
+    <div class="col-6 col-lg-3"><div class="card h-100"><div class="card-body"><div class="kpi-label">Equipos</div><div class="kpi-number">{{ stats.total }}</div></div></div></div>
+    <div class="col-6 col-lg-3"><a class="card kpi-card h-100 text-decoration-none" href="?garantia=por_vencer"><div class="card-body"><div class="kpi-label">Garantía por vencer ({{ aviso_dias }} días)</div><div class="kpi-number {% if stats.garantia_por_vencer %}text-warning{% endif %}">{{ stats.garantia_por_vencer }}</div></div></a></div>
+    <div class="col-6 col-lg-3"><a class="card kpi-card h-100 text-decoration-none" href="?garantia=vencida"><div class="card-body"><div class="kpi-label">Garantía vencida</div><div class="kpi-number">{{ stats.garantia_vencida }}</div></div></a></div>
+    <div class="col-6 col-lg-3"><div class="card h-100"><div class="card-body small">
+        <div class="kpi-label mb-1">Por estado</div>
+        {% for e in stats.por_estado %}<div class="d-flex justify-content-between"><span><span class="badge bg-{{ e.estado__color }}">&nbsp;</span> {{ e.estado__nombre }}</span><strong>{{ e.n }}</strong></div>{% empty %}<span class="text-muted">—</span>{% endfor %}
+    </div></div></div>
+</div>
+{% if stats.total %}
+<div class="row g-3 mb-3">
+    <div class="col-md-6"><div class="card h-100"><div class="card-body small">
+        <div class="kpi-label mb-2">Por categoría</div>
+        {% for c in stats.por_categoria %}
+        <div class="d-flex align-items-center gap-2 mb-1"><span style="width: 40%">{{ c.categoria__nombre }}</span>
+            <div class="progress flex-grow-1" style="height: 8px" role="progressbar" aria-label="{{ c.categoria__nombre }}" aria-valuenow="{{ c.n }}" aria-valuemin="0" aria-valuemax="{{ stats.total }}">
+                <div class="progress-bar" style="width: {% widthratio c.n stats.total 100 %}%; background: var(--tc-gold)"></div></div>
+            <strong style="width: 2.5rem" class="text-end">{{ c.n }}</strong></div>
+        {% endfor %}
+    </div></div></div>
+    <div class="col-md-6"><div class="card h-100"><div class="card-body small">
+        <div class="kpi-label mb-2">Por ubicación</div>
+        {% for u in stats.por_ubicacion %}
+        <div class="d-flex align-items-center gap-2 mb-1"><span style="width: 40%">{{ u.ubicacion__nombre }}</span>
+            <div class="progress flex-grow-1" style="height: 8px" role="progressbar" aria-label="{{ u.ubicacion__nombre }}" aria-valuenow="{{ u.n }}" aria-valuemin="0" aria-valuemax="{{ stats.total }}">
+                <div class="progress-bar" style="width: {% widthratio u.n stats.total 100 %}%; background: var(--tc-gold)"></div></div>
+            <strong style="width: 2.5rem" class="text-end">{{ u.n }}</strong></div>
+        {% endfor %}
+    </div></div></div>
+</div>
+{% endif %}
+
+<!-- Filtros -->
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-2">
+            <div class="col-lg-4 col-md-6"><input type="text" name="q" class="form-control" placeholder="Buscar código, nombre, marca, serie, responsable…" value="{{ filtros.q }}" aria-label="Buscar"></div>
+            <div class="col-lg-2 col-md-3 col-6">
+                <select name="categoria" class="form-select" aria-label="Categoría"><option value="">Toda categoría</option>
+                    {% for c in categorias %}<option value="{{ c.pk }}" {% if filtros.categoria == c.pk|stringformat:'s' %}selected{% endif %}>{{ c.nombre }}</option>{% endfor %}</select>
+            </div>
+            <div class="col-lg-2 col-md-3 col-6">
+                <select name="estado" class="form-select" aria-label="Estado"><option value="">Todo estado</option>
+                    {% for e in estados %}<option value="{{ e.pk }}" {% if filtros.estado == e.pk|stringformat:'s' %}selected{% endif %}>{{ e.nombre }}</option>{% endfor %}</select>
+            </div>
+            <div class="col-lg-2 col-md-4 col-6">
+                <select name="ubicacion" class="form-select" aria-label="Ubicación"><option value="">Toda ubicación</option>
+                    {% for u in ubicaciones %}<option value="{{ u.pk }}" {% if filtros.ubicacion == u.pk|stringformat:'s' %}selected{% endif %}>{{ u.nombre }}</option>{% endfor %}</select>
+            </div>
+            <div class="col-lg-2 col-md-4 col-6">
+                <select name="departamento" class="form-select" aria-label="Departamento"><option value="">Todo departamento</option>
+                    {% for d in departamentos %}<option value="{{ d }}" {% if filtros.departamento == d %}selected{% endif %}>{{ d }}</option>{% endfor %}</select>
+            </div>
+            <div class="col-lg-3 col-md-4 col-6">
+                <select name="garantia" class="form-select" aria-label="Garantía"><option value="">Cualquier garantía</option>
+                    <option value="por_vencer" {% if filtros.garantia == 'por_vencer' %}selected{% endif %}>Por vencer</option>
+                    <option value="vencida" {% if filtros.garantia == 'vencida' %}selected{% endif %}>Vencida</option>
+                    <option value="sin" {% if filtros.garantia == 'sin' %}selected{% endif %}>Sin garantía registrada</option></select>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <select name="orden" class="form-select" aria-label="Orden">{% for v, l in ordenes %}<option value="{{ v }}" {% if filtros.orden == v %}selected{% endif %}>Orden: {{ l }}</option>{% endfor %}</select>
+            </div>
+            <div class="col-lg-2 col-6"><button class="btn btn-primary w-100"><i class="bi bi-search"></i> Filtrar</button></div>
+            <div class="col-lg-2 col-6"><a href="{% url 'activo_lista' %}" class="btn btn-outline-secondary w-100 {% if not hay_filtros %}disabled{% endif %}"><i class="bi bi-x-lg"></i> Limpiar</a></div>
+        </form>
+    </div>
+</div>
+
+<p class="small text-muted mb-2">{{ total }} equipo{{ total|pluralize }}{% if hay_filtros %} con estos filtros{% endif %}</p>
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead><tr><th>Código</th><th>Equipo</th><th>Categoría</th><th>Ubicación</th><th>Responsable</th><th>Estado</th><th>Garantía</th></tr></thead>
+            <tbody>
+            {% for a in pagina %}
+                <tr style="cursor:pointer" onclick="window.location='{% url 'activo_editar' a.pk %}'">
+                    <td class="text-nowrap"><a href="{% url 'activo_editar' a.pk %}" class="fw-semibold text-decoration-none">{{ a.codigo }}</a></td>
+                    <td>{{ a.nombre }}<div class="small text-muted">{{ a.marca }} {{ a.modelo }}{% if a.numero_serie %} · S/N {{ a.numero_serie }}{% endif %}</div></td>
+                    <td class="small">{{ a.categoria }}</td>
+                    <td class="small">{{ a.ubicacion }}{% if a.departamento %}<div class="text-muted">{{ a.departamento }}</div>{% endif %}</td>
+                    <td class="small">{{ a.responsable|default:"—" }}</td>
+                    <td><span class="badge bg-{{ a.estado.color }}">{{ a.estado }}</span></td>
+                    <td class="small text-nowrap">{% if a.garantia_hasta %}<span class="{% if a.estado_garantia == 'vencida' %}text-muted text-decoration-line-through{% elif a.estado_garantia == 'por_vencer' %}text-warning fw-semibold{% endif %}">{{ a.garantia_hasta|date:"d/m/Y" }}</span>{% else %}—{% endif %}</td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="7" class="text-center text-muted py-5">{% if hay_filtros %}No hay equipos con estos filtros.{% else %}Todavía no hay equipos registrados.{% endif %}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% if pagina.has_other_pages %}
+<nav class="mt-3" aria-label="Páginas"><ul class="pagination pagination-sm">
+    {% if pagina.has_previous %}<li class="page-item"><a class="page-link" href="?{{ query_sin_pagina }}{% if query_sin_pagina %}&{% endif %}page={{ pagina.previous_page_number }}">Anterior</a></li>{% endif %}
+    <li class="page-item disabled"><span class="page-link">{{ pagina.number }} / {{ pagina.paginator.num_pages }}</span></li>
+    {% if pagina.has_next %}<li class="page-item"><a class="page-link" href="?{{ query_sin_pagina }}{% if query_sin_pagina %}&{% endif %}page={{ pagina.next_page_number }}">Siguiente</a></li>{% endif %}
+</ul></nav>
+{% endif %}
+{% endblock %}
